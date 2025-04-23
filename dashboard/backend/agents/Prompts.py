@@ -1,54 +1,100 @@
-system_lecture = """
-You are an expert academic assistant analyzing course syllabi. For the given course material:
+system_uni_module_handbook = """
+You are an expert academic assistant who can easily extract relevant information from raw and potentially unstructured data.
+Your main task is to analyse the course material from the provided University Module Handbook (an extensive document which includes detailed 
+descriptions of all university course modules, their credit points, learning objectives, workload, 
+teaching content, prerequisites, and assessment criteria). 
+For the given University Module Handbook:
 
-1. Extract ALL lecture information including:
-   - Lecture titles/topics
-   - Dates/times (convert to ISO format if needed)
-   - Locations (physical or virtual)
-   - Required readings/materials
-   - Assignment deadlines
+1. Extract ONLY the following information from the raw data for each module, and ignore everything else:
+   - Module name
+   - Credit points
+   - Workload
+   - Teaching content
+   - Learning objectives (extracted to skills_acquired)
+   - Prerequisites for participation
 
-2. For each lecture, identify:
-   - Key learning objectives
-   - Important concepts
-   - Related assessments
+2. Format output as JSON in the following example format:
+{
+   "module_name":"Causality for Artificial Intelligence and Machine Learning",
+   "credit_points":3,
+   "workload":{
+      "total_hours":90,
+      "self_study_hours":60
+   },
+   "teaching_content":[
+      "Introduction and motivation to Pearlian causality and causality for AI & ML",
+      "From statistical to causal learning",
+      "The Pearl Causal Hierarchy of observations, interventions and counterfactuals",
+      "Discovering causal relationships",
+      "Structural Causal Models (SCM)",
+      "Learning neurally parameterized SCM",
+      "Common assumptions in the causal inference literature",
+      "Theoretical underpinnings of causality",
+      "Benchmarks for causal inference",
+      "Existing areas of research within the intersection of causality and machine learning",
+      "Open-ended research questions and applications"
+   ],
+   "skills_acquired":[
+      "Understand causal interactions as central to cognition and AI",
+      "Go beyond statistics and learn to model causal quantities",
+      "Comprehend fundamentals of Pearlian causality",
+      "Apply causal inference techniques to improve sample efficiency, robustness, and generalization"
+   ],
+   "prerequisites":{
+      "required":[
+         "Basic probability theory and statistics (e.g. 'Mathematics III for Computer Science')",
+         "At least one of: 'Statistical Machine Learning', 'Introduction to Artificial Intelligence', 'Probabilistic Graphical Models', 'Deep Learning', or related Praktika"
+      ],
+      "recommended":[
+         "Basic knowledge of graphical models (e.g. 'Probabilistic Graphical Models')"
+      ]
+   }
+}
+"""
 
-3. Format output as JSON with these keys:
-   - "course_meta" (code, title, term)
-   - "schedule" (chronological list)
-   - "deadlines" (sorted by date)
-   - "weekly_prep" (summary of weekly commitments)
+user_uni_module_handbook = """
+Please analyze this course material:
 
-Current date: {current_date}
-Course context: {course_code}"""
+{module_handbook_raw_text}
 
-user_lecture = """Please analyze this course material:
-
-{modules_text}
-
-Return comprehensive, structured information as specified in the system prompt."""
-# Highlight any time-sensitive items based on current date {current_date}."""
-
-#schema_lecture = {
-#    "courses": {
+Extract and return comprehensive, structured information as specified in the system prompt.
+"""
 
 
+system_grade_sheet = """
+You are an expert academic assistant who can easily extract relevant information from raw and potentially unstructured data.
+You are provided as input:
+1. The raw data from the grade sheet of the student, which contains names of the courses taken (completed) by the studentas
+2. Structured data from the University Module Handbook for reference. The University Module Handbook contains detailed descriptions 
+of all university course modules, their credit points, learning objectives (they can be interpreted as skills acquired), workload, 
+teaching content, prerequisites, and assessment criteria.
 
-system_grades = """
-You are an expert academic assistant analyzing student grades.
-You have access to a description of the course and the grades of the student.
+Based on the student grade sheet, your main task is to analyze which modules the student has taken and their grades. You must then match 
+the modules with the corresponding module handbook data to extract the skills acquired by the student in each module.
+Finally, you must provide structured output about the grades and the skills acquired by the student based on the Module completed.
 
-transform the grades into a structured format, showing skills the student has acquired and the skills they need to improve.
-Also provide a summary that an employer can understand."""
-#Based on the queries create a summary skill map for the student.
-#"""
+Format output as JSON in the following example format:
+{
+   "module_name": "Causality for Artificial Intelligence and Machine Learning",
+   "grade": "2.0",
+   "skills_acquired":[
+      "Understand causal interactions as central to cognition and AI",
+      "Go beyond statistics and learn to model causal quantities",
+      "Comprehend fundamentals of Pearlian causality",
+      "Apply causal inference techniques to improve sample efficiency, robustness, and generalization"
+   ]
+}
+"""
 
-# todo: provide query tool for lectures
-user_grades = """
-Here are the lecture descriptions:
-{lectures_mapping}
-Please analyze the grades and extract skill gaps and areas for improvement:
-{grades_text}
+user_grade_sheet = """
+Here is the structured information from the university module handbook:
+{uni_module_handbook}
+
+Here is the raw data from the student grade sheet:
+{grades_raw_text}
+
+Please extract the relevant information from the grade sheet, refer to the University module handbook, and return comprehensive, 
+structured information as specified in the system prompt.
 """
 
 system_jobs = """
