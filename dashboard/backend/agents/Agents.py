@@ -55,12 +55,10 @@ class Agents:
                                'modules_text': modules_text})
         return result
 
-    def get_grades(self, current_date: str, lectures_mapping: dict, grades_text: str) -> Dict[str, List[str]]:
+    def get_grades(self, lectures_mapping: dict, grades_text: str):
         prompt_template = get_chat_prompt_template(Prompts.system_grades, Prompts.user_grades)
         chain = prompt_template | self.llm.with_structured_output(example_schema)
-        raw_text = convert_to_text(file_path)
-        result = chain.invoke({'current_date': current_date,
-                               'course_code': course_code,
-                               'raw_text': raw_text})
+        result = chain.invoke({'lectures_mapping': lectures_mapping,
+                               'grades_text': grades_text,})
         return result
 

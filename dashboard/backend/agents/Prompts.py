@@ -36,16 +36,19 @@ Return comprehensive, structured information as specified in the system prompt."
 
 system_grades = """
 You are an expert academic assistant analyzing student grades.
-You have access to the following tool to query information about a lecture
-...
+You have access to a description of the course and the grades of the student.
 
-Based on the queries create a summary skill map for the student.
-"""
+transform the grades into a structured format, showing skills the student has acquired and the skills they need to improve.
+Also provide a summary that an employer can understand."""
+#Based on the queries create a summary skill map for the student.
+#"""
 
 # todo: provide query tool for lectures
 user_grades = """
+Here are the lecture descriptions:
+{lectures_mapping}
 Please analyze the grades and extract skill gaps and areas for improvement:
-{grades}
+{grades_text}
 """
 
 system_jobs = """
