@@ -8,8 +8,8 @@ from .. import styles
 from ..templates import template
 
 
-@template(route="/about", title="About")
-def about() -> rx.Component:
+@template(route="/jobs", title="Your jobs")
+def Jobs() -> rx.Component:
     """The about page.
 
     Returns:

@@ -7,8 +7,8 @@ from ..templates import template
 from ..views.table import main_table
 
 
-@template(route="/table", title="Table", on_load=TableState.load_entries)
-def table() -> rx.Component:
+@template(route="/roadmap", title="Your Roadmap", on_load=TableState.load_entries)
+def Roadmap() -> rx.Component:
     """The table page.
 
     Returns:

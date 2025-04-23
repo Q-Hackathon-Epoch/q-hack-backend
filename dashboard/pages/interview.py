@@ -23,8 +23,8 @@ class ProfileState(rx.State):
         self.profile.notifications = not self.profile.notifications
 
 
-@template(route="/profile", title="Profile")
-def profile() -> rx.Component:
+@template(route="/interview", title="Mock Interview Preporation")
+def Interview() -> rx.Component:
     """The profile page.
 
     Returns:

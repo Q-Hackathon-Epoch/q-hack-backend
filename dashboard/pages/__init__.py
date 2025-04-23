@@ -1,7 +1,7 @@
-from .about import about
+from .jobs import Jobs
 from .index import index
-from .profile import profile
+from .interview import Interview
 from .settings import settings
-from .table import table
+from .roadmap import Roadmap
 
-__all__ = ["about", "index", "profile", "settings", "table"]
+__all__ = ["Jobs", "index", "interview", "settings", "roadmap"]

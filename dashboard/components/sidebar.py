@@ -15,14 +15,14 @@ def sidebar_header() -> rx.Component:
     return rx.hstack(
         # The logo.
         rx.color_mode_cond(
-            rx.image(src="/reflex_black.svg", height="1.5em"),
-            rx.image(src="/reflex_white.svg", height="1.5em"),
+            rx.image(src="/reflex_black.svg", height="3em"),
+            rx.image(src="/reflex_white.svg", height="3em"),
         ),
         rx.spacer(),
         align="center",
         width="100%",
         padding="0.35em",
-        margin_bottom="1em",
+        margin_bottom="3em",
     )
 
 
@@ -79,10 +79,10 @@ def sidebar_item(text: str, url: str) -> rx.Component:
         rx.hstack(
             rx.match(
                 text,
-                ("Overview", sidebar_item_icon("home")),
-                ("Table", sidebar_item_icon("table-2")),
-                ("About", sidebar_item_icon("book-open")),
-                ("Profile", sidebar_item_icon("user")),
+                ("Upload Your Data", sidebar_item_icon("home")),
+                ("Your Roadmap", sidebar_item_icon("table-2")),
+                ("Your jobs", sidebar_item_icon("book-open")),
+                ("Mock Interview Preporation", sidebar_item_icon("user")),
                 ("Settings", sidebar_item_icon("settings")),
                 sidebar_item_icon("layout-dashboard"),
             ),
@@ -137,9 +137,9 @@ def sidebar() -> rx.Component:
     # The ordered page routes.
     ordered_page_routes = [
         "/",
-        "/table",
-        "/about",
-        "/profile",
+        "/roadmap",
+        "/jobs",
+        "/interview",
         "/settings",
     ]
 
