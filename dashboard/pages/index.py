@@ -125,69 +125,96 @@ def index() -> rx.Component:
         #         ("orders", orders_chart()),
         #     ),
         # ),
-        rx.grid(
-            card(
-                rx.heading("Please tell us about your Uni Modules", mb='5em'),
-                rx.upload(
+        rx.form(
+            rx.flex(
+                card(
+                    rx.flex(
+                        rx.heading(
+                            "Please tell us about your Uni Modules",
+                            margin_bottom='1rem',
+                        ),
+                        rx.upload(
                             rx.vstack(
-                                rx.button(
-                                    "Select File",
-                                    color="red",
-                                    bg="white",
-                                    border=f"1px solid red",
-                                    box_shadow=styles.box_shadow_style,
-                                ),
                                 rx.text(
-                                    "Drag and drop files here or click to select files"
+                                    "Drag and drop your Module Handbook [html, pdf]"
                                 ),
                             ),
-                            id="upload1",
-                            border=f"1px dotted red",
+                            id="upload_moduls",
+                            accept={
+                                "application/pdf": [".pdf"],
+                                "text/html": [".html", ".htm"],
+                            },
+                            multiple=False,
+                            max_files=1,     
+                            box_shadow=styles.box_shadow_style,
                             padding="5em",
                         ),
                         rx.hstack(
                             rx.foreach(
-                                rx.selected_files("upload1"), rx.text
+                                rx.selected_files("upload_moduls"), rx.text
                             )
-                        ),
-                        rx.button(
-                            "Upload",
-                            on_click=State.handle_upload(
-                                rx.upload_files(upload_id="upload1")
-                            ),
-                        ),
-                        rx.button(
-                            "Clear",
-                            on_click=rx.clear_selected_files("upload1"),
                         ),
                         rx.foreach(
                             State.img,
                             lambda img: rx.image(
                                 src=rx.get_upload_url(img)
                             ),
-                        )
-            ),
-            card(
-                rx.hstack(
-                    rx.icon("globe", size=20),
-                    rx.text("Acquisition Overview", size="4", weight="medium"),
-                    align="center",
-                    spacing="2",
-                    margin_bottom="2.5em",
+                        ),
+                        gap='1rem',
+                        direction="column",
+                        align="start",
+                    ),
                 ),
-                rx.vstack(
-                    acquisition(),
+                card(
+                    rx.flex(
+                        rx.heading(
+                            "Please tell us what have you already done in Uni? [html, pdf]",
+                            margin_bottom='1rem',
+                        ),
+                        rx.upload(
+                            rx.vstack(
+                                rx.text(
+                                    "Drag and drop your progress report [html, pdf]"
+                                ),
+                            ),
+                            id="upload_progress",
+                            accept={
+                                "application/pdf": [".pdf"],
+                                "text/html": [".html", ".htm"],
+                            },
+                            multiple=False,
+                            max_files=1,       
+                            box_shadow=styles.box_shadow_style,
+                            padding="5em",
+                        ),
+                        rx.hstack(
+                            rx.foreach(
+                                rx.selected_files("upload_progress"), rx.text
+                            )
+                        ),
+                        rx.foreach(
+                            State.img,
+                            lambda img: rx.image(
+                                src=rx.get_upload_url(img)
+                            ),
+                        ),
+                        gap='1rem',
+                        direction="column",
+                        align="start",
+                    ),
                 ),
+                rx.button(
+                    "Submit",
+                    type="submit",
+                    margin_top='1rem'
+                ),
+                gap="1rem",
+                direction="column",
+                align="center",
+                width='40%',
+                margin='auto',
             ),
-            gap="1rem",
-            grid_template_columns=[
-                "1fr",
-                "repeat(1, 1fr)",
-                "repeat(2, 1fr)",
-                "repeat(2, 1fr)",
-                "repeat(2, 1fr)",
-            ],
-            width="100%",
+            
         ),
         spacing="8",
         width="100%",
