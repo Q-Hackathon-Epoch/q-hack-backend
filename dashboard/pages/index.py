@@ -44,6 +44,32 @@ def tab_content_header() -> rx.Component:
         spacing="4",
     )
 
+class State(rx.State):
+    """The app state."""
+
+    # The images to show.
+    img: list[str]
+
+    @rx.event
+    async def handle_upload(
+        self, files: list[rx.UploadFile]
+    ):
+        """Handle the upload of file(s).
+
+        Args:
+            files: The uploaded files.
+        """
+        for file in files:
+            upload_data = await file.read()
+            outfile = rx.get_upload_dir() / file.filename
+
+            # Save the file.
+            with outfile.open("wb") as file_object:
+                file_object.write(upload_data)
+
+            # Update the img var.
+            self.img.append(file.filename)
+
 
 @template(route="/", title="Overview", on_load=StatsState.randomize_data)
 def index() -> rx.Component:
@@ -54,66 +80,92 @@ def index() -> rx.Component:
 
     """
     return rx.vstack(
-        rx.heading(f"Welcome, {ProfileState.profile.name}", size="5"),
-        rx.flex(
-            rx.input(
-                rx.input.slot(rx.icon("search"), padding_left="0"),
-                placeholder="Search here...",
-                size="3",
-                width="100%",
-                max_width="450px",
-                radius="large",
-                style=styles.ghost_input_style,
-            ),
-            rx.flex(
-                notification("bell", "cyan", 12),
-                notification("message-square-text", "plum", 6),
-                spacing="4",
-                width="100%",
-                wrap="nowrap",
-                justify="end",
-            ),
-            justify="between",
-            align="center",
-            width="100%",
-        ),
-        stats_cards(),
-        card(
-            rx.hstack(
-                tab_content_header(),
-                rx.segmented_control.root(
-                    rx.segmented_control.item("Users", value="users"),
-                    rx.segmented_control.item("Revenue", value="revenue"),
-                    rx.segmented_control.item("Orders", value="orders"),
-                    margin_bottom="1.5em",
-                    default_value="users",
-                    on_change=StatsState.set_selected_tab,
-                ),
-                width="100%",
-                justify="between",
-            ),
-            rx.match(
-                StatsState.selected_tab,
-                ("users", users_chart()),
-                ("revenue", revenue_chart()),
-                ("orders", orders_chart()),
-            ),
-        ),
+        rx.heading(f"Let's Get To Know You Better", size="9"),
+        # rx.flex(
+        #     rx.input(
+        #         rx.input.slot(rx.icon("search"), padding_left="0"),
+        #         placeholder="Search here...",
+        #         size="3",
+        #         width="100%",
+        #         max_width="450px",
+        #         radius="large",
+        #         style=styles.ghost_input_style,
+        #     ),
+        #     rx.flex(
+        #         notification("bell", "cyan", 12),
+        #         notification("message-square-text", "plum", 6),
+        #         spacing="4",
+        #         width="100%",
+        #         wrap="nowrap",
+        #         justify="end",
+        #     ),
+        #     justify="between",
+        #     align="center",
+        #     width="100%",
+        # ),
+        # stats_cards(),
+        # card(
+        #     rx.hstack(
+        #         tab_content_header(),
+        #         rx.segmented_control.root(
+        #             rx.segmented_control.item("Users", value="users"),
+        #             rx.segmented_control.item("Revenue", value="revenue"),
+        #             rx.segmented_control.item("Orders", value="orders"),
+        #             margin_bottom="1.5em",
+        #             default_value="users",
+        #             on_change=StatsState.set_selected_tab,
+        #         ),
+        #         width="100%",
+        #         justify="between",
+        #     ),
+        #     rx.match(
+        #         StatsState.selected_tab,
+        #         ("users", users_chart()),
+        #         ("revenue", revenue_chart()),
+        #         ("orders", orders_chart()),
+        #     ),
+        # ),
         rx.grid(
             card(
-                rx.hstack(
-                    rx.hstack(
-                        rx.icon("user-round-search", size=20),
-                        rx.text("Visitors Analytics", size="4", weight="medium"),
-                        align="center",
-                        spacing="2",
-                    ),
-                    timeframe_select(),
-                    align="center",
-                    width="100%",
-                    justify="between",
-                ),
-                pie_chart(),
+                rx.heading("Please tell us about your Uni Modules", mb='5em'),
+                rx.upload(
+                            rx.vstack(
+                                rx.button(
+                                    "Select File",
+                                    color="red",
+                                    bg="white",
+                                    border=f"1px solid red",
+                                    box_shadow=styles.box_shadow_style,
+                                ),
+                                rx.text(
+                                    "Drag and drop files here or click to select files"
+                                ),
+                            ),
+                            id="upload1",
+                            border=f"1px dotted red",
+                            padding="5em",
+                        ),
+                        rx.hstack(
+                            rx.foreach(
+                                rx.selected_files("upload1"), rx.text
+                            )
+                        ),
+                        rx.button(
+                            "Upload",
+                            on_click=State.handle_upload(
+                                rx.upload_files(upload_id="upload1")
+                            ),
+                        ),
+                        rx.button(
+                            "Clear",
+                            on_click=rx.clear_selected_files("upload1"),
+                        ),
+                        rx.foreach(
+                            State.img,
+                            lambda img: rx.image(
+                                src=rx.get_upload_url(img)
+                            ),
+                        )
             ),
             card(
                 rx.hstack(
