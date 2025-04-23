@@ -51,6 +51,25 @@ import reflex as rx
 
 class State(rx.State):
     """The app state."""
+    problems: str = ""
+    goals: str = ""
+    weaknesses: str = ""
+    strength: str = ""
+
+    async def handle_submit(self):
+        content = (
+            f"Problems: {self.problems}\n"
+            f"Goals: {self.goals}\n"
+            f"Weaknesses: {self.weaknesses}\n"
+            f"Strength: {self.strength}\n"
+        )
+        upload_dir = rx.get_upload_dir()
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = "students-self-description.txt"
+        outfile = upload_dir / filename 
+        with outfile.open("w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"Form data saved to {filename}")
 
     async def handle_upload(self, files):
         """Handle the upload of file(s).
@@ -209,22 +228,26 @@ def index() -> rx.Component:
                 card(
                     rx.flex(
                         rx.input(
-                            name="problems",
+                            value=State.problems,             
+                            on_change=State.set_problems,     
                             placeholder="Your problems",
                             width="100%",
                         ),
                         rx.input(
-                            name="goals",
+                            value=State.goals,                
+                            on_change=State.set_goals,        
                             placeholder="Your goals",
                             width="100%",
                         ),
                         rx.input(
-                            name="weaknesses",
+                            value=State.weaknesses,           
+                            on_change=State.set_weaknesses,   
                             placeholder="Your weaknesses",
                             width="100%",
                         ),
                         rx.input(
-                            name="strength",
+                            value=State.strength,             
+                            on_change=State.set_strength,     
                             placeholder="Your strength",
                             width="100%",
                         ),
@@ -239,6 +262,7 @@ def index() -> rx.Component:
                 width="40rem",
                 margin="auto",
             ),
+            on_submit=State.handle_submit,
         ),
         spacing="8",
         width="100%",
