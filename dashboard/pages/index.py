@@ -44,13 +44,13 @@ def tab_content_header() -> rx.Component:
         spacing="4",
     )
 
+import datetime
+import reflex as rx
+
+
 class State(rx.State):
     """The app state."""
 
-    # The images to show.
-    img: list[str]
-
-    @rx.event
     async def handle_upload(
         self, files: list[rx.UploadFile]
     ):
@@ -66,9 +66,9 @@ class State(rx.State):
             # Save the file.
             with outfile.open("wb") as file_object:
                 file_object.write(upload_data)
+                print(f"The file {file.filename} was uploaded")
 
-            # Update the img var.
-            self.img.append(file.filename)
+
 
 
 @template(route="/", title="Overview", on_load=StatsState.randomize_data)
@@ -127,94 +127,65 @@ def index() -> rx.Component:
         # ),
         rx.form(
             rx.flex(
-                card(
-                    rx.flex(
-                        rx.heading(
-                            "Please tell us about your Uni Modules",
-                            margin_bottom='1rem',
-                        ),
-                        rx.upload(
-                            rx.vstack(
-                                rx.text(
-                                    "Drag and drop your Module Handbook [html, pdf]"
-                                ),
-                            ),
-                            id="upload_moduls",
-                            accept={
-                                "application/pdf": [".pdf"],
-                                "text/html": [".html", ".htm"],
-                            },
-                            multiple=False,
-                            max_files=1,     
-                            box_shadow=styles.box_shadow_style,
-                            padding="5em",
-                        ),
-                        rx.hstack(
-                            rx.foreach(
-                                rx.selected_files("upload_moduls"), rx.text
-                            )
-                        ),
-                        rx.foreach(
-                            State.img,
-                            lambda img: rx.image(
-                                src=rx.get_upload_url(img)
-                            ),
-                        ),
-                        gap='1rem',
-                        direction="column",
-                        align="start",
+            card(
+                rx.upload(
+                    rx.text("Drag & drop your Module Handbook [pdf, html]"),
+                    id="upload_modules",
+                    accept={
+                        "application/pdf": [".pdf"],
+                        "text/html": [".html", ".htm"],
+                    },
+                    on_drop=State.handle_upload(
+                        rx.upload_files(upload_id="upload_file_modules")
                     ),
+                    max_files=1,
                 ),
-                card(
-                    rx.flex(
-                        rx.heading(
-                            "Please tell us what have you already done in Uni? [html, pdf]",
-                            margin_bottom='1rem',
-                        ),
-                        rx.upload(
-                            rx.vstack(
-                                rx.text(
-                                    "Drag and drop your progress report [html, pdf]"
-                                ),
-                            ),
-                            id="upload_progress",
-                            accept={
-                                "application/pdf": [".pdf"],
-                                "text/html": [".html", ".htm"],
-                            },
-                            multiple=False,
-                            max_files=1,       
-                            box_shadow=styles.box_shadow_style,
-                            padding="5em",
-                        ),
-                        rx.hstack(
-                            rx.foreach(
-                                rx.selected_files("upload_progress"), rx.text
-                            )
-                        ),
-                        rx.foreach(
-                            State.img,
-                            lambda img: rx.image(
-                                src=rx.get_upload_url(img)
-                            ),
-                        ),
-                        gap='1rem',
-                        direction="column",
-                        align="start",
-                    ),
-                ),
-                rx.button(
-                    "Submit",
-                    type="submit",
-                    margin_top='1rem'
-                ),
-                gap="1rem",
-                direction="column",
-                align="center",
-                width='40%',
-                margin='auto',
             ),
-            
+            card(
+                rx.upload(
+                    rx.text("Drag & drop your academic transcript [pdf, html]"),
+                    id="upload_transcript",
+                    accept={
+                        "application/pdf": [".pdf"],
+                        "text/html": [".html", ".htm"],
+                    },
+                    on_drop=State.handle_upload(
+                        rx.upload_files(upload_id="upload_file_modules")
+                    ),
+                    max_files=1,
+                ),
+            ),
+            card(
+                rx.upload(
+                    rx.text("Drag & drop your LinkedIn / GitHub snapshot [pdf, html]"),
+                    id="upload_skills",
+                    accept={
+                        "application/pdf": [".pdf"],
+                        "text/html": [".html", ".htm"],
+                    },
+                    on_drop=State.handle_upload(
+                        rx.upload_files(upload_id="upload_file_modules")
+                    ),
+                    max_files=1,
+                
+                ),
+            ),
+            card(
+                rx.flex(
+                    rx.input(name="problems",    placeholder="Your problems",    width="100%"),
+                    rx.input(name="goals",       placeholder="Your goals",       width="100%"),
+                    rx.input(name="weaknesses",  placeholder="Your weaknesses",  width="100%"),
+                    rx.input(name="strength",    placeholder="Your strength",    width="100%"),
+                    gap="1rem", direction="column",
+                ),
+            ),
+            rx.button("Submit", type="submit", margin_top="1rem"),
+            gap="1rem",
+            direction="column",
+            align="center",
+            width='40rem',
+            margin='auto',
+            ),
         ),
         spacing="8",
         width="100%",
