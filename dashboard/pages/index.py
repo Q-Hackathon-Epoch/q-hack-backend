@@ -44,6 +44,7 @@ def tab_content_header() -> rx.Component:
         spacing="4",
     )
 
+
 import datetime
 import reflex as rx
 
@@ -51,24 +52,60 @@ import reflex as rx
 class State(rx.State):
     """The app state."""
 
-    async def handle_upload(
-        self, files: list[rx.UploadFile]
-    ):
+    async def handle_upload(self, files):
         """Handle the upload of file(s).
 
         Args:
-            files: The uploaded files.
+            files: The uploaded files. Can be a file object, bytes, or a list of either.
         """
-        for file in files:
-            upload_data = await file.read()
-            outfile = rx.get_upload_dir() / file.filename
+        # Add a check to see what we're receiving
+        print(f"Received upload: {type(files)}")
 
-            # Save the file.
-            with outfile.open("wb") as file_object:
-                file_object.write(upload_data)
-                print(f"The file {file.filename} was uploaded")
+        try:
+            # Handle as a list
+            if isinstance(files, list):
+                for file in files:
+                    if hasattr(file, "read"):
+                        # It's a file-like object
+                        upload_data = await file.read()
+                        filename = file.filename
+                    else:
+                        # It's raw bytes
+                        upload_data = file
+                        # Generate a timestamp-based filename since we don't have the original
+                        timestamp = datetime.datetime.now().strftime(
+                            "%Y%m%d_%H%M%S"
+                        )
+                        filename = f"upload_{timestamp}.pdf"
 
+                    outfile = rx.get_upload_dir() / filename
+                    with outfile.open("wb") as file_object:
+                        file_object.write(upload_data)
+                    print(f"The file {filename} was uploaded")
 
+            # Handle as a single item
+            else:
+                file = files
+                if hasattr(file, "read"):
+                    # It's a file-like object
+                    upload_data = await file.read()
+                    filename = file.filename
+                else:
+                    # It's raw bytes
+                    upload_data = file
+                    # Generate a timestamp-based filename
+                    timestamp = datetime.datetime.now().strftime(
+                        "%Y%m%d_%H%M%S"
+                    )
+                    filename = f"upload_{timestamp}.pdf"
+
+                outfile = rx.get_upload_dir() / filename
+                with outfile.open("wb") as file_object:
+                    file_object.write(upload_data)
+                print(f"The file {filename} was uploaded")
+
+        except Exception as e:
+            print(f"Error in handle_upload: {type(e).__name__}: {e}")
 
 
 @template(route="/", title="Overview", on_load=StatsState.randomize_data)
@@ -127,64 +164,80 @@ def index() -> rx.Component:
         # ),
         rx.form(
             rx.flex(
-            card(
-                rx.upload(
-                    rx.text("Drag & drop your Module Handbook [pdf, html]"),
-                    id="upload_modules",
-                    accept={
-                        "application/pdf": [".pdf"],
-                        "text/html": [".html", ".htm"],
-                    },
-                    on_drop=State.handle_upload(
-                        rx.upload_files(upload_id="upload_file_modules")
+                card(
+                    rx.upload(
+                        rx.text(
+                            "Drag & drop your Module Handbook [pdf, html]"
+                        ),
+                        id="upload_modules",
+                        accept={
+                            "application/pdf": [".pdf"],
+                            "text/html": [".html", ".htm"],
+                        },
+                        on_drop=State.handle_upload,
+                        max_files=1,
                     ),
-                    max_files=1,
                 ),
-            ),
-            card(
-                rx.upload(
-                    rx.text("Drag & drop your academic transcript [pdf, html]"),
-                    id="upload_transcript",
-                    accept={
-                        "application/pdf": [".pdf"],
-                        "text/html": [".html", ".htm"],
-                    },
-                    on_drop=State.handle_upload(
-                        rx.upload_files(upload_id="upload_file_modules")
+                card(
+                    rx.upload(
+                        rx.text(
+                            "Drag & drop your academic transcript [pdf, html]"
+                        ),
+                        id="upload_transcript",
+                        accept={
+                            "application/pdf": [".pdf"],
+                            "text/html": [".html", ".htm"],
+                        },
+                        on_drop=State.handle_upload,
+                        max_files=1,
                     ),
-                    max_files=1,
                 ),
-            ),
-            card(
-                rx.upload(
-                    rx.text("Drag & drop your LinkedIn / GitHub snapshot [pdf, html]"),
-                    id="upload_skills",
-                    accept={
-                        "application/pdf": [".pdf"],
-                        "text/html": [".html", ".htm"],
-                    },
-                    on_drop=State.handle_upload(
-                        rx.upload_files(upload_id="upload_file_modules")
+                card(
+                    rx.upload(
+                        rx.text(
+                            "Drag & drop your LinkedIn / GitHub snapshot [pdf, html]"
+                        ),
+                        id="upload_skills",
+                        accept={
+                            "application/pdf": [".pdf"],
+                            "text/html": [".html", ".htm"],
+                        },
+                        on_drop=State.handle_upload,
+                        max_files=1,
                     ),
-                    max_files=1,
-                
                 ),
-            ),
-            card(
-                rx.flex(
-                    rx.input(name="problems",    placeholder="Your problems",    width="100%"),
-                    rx.input(name="goals",       placeholder="Your goals",       width="100%"),
-                    rx.input(name="weaknesses",  placeholder="Your weaknesses",  width="100%"),
-                    rx.input(name="strength",    placeholder="Your strength",    width="100%"),
-                    gap="1rem", direction="column",
+                card(
+                    rx.flex(
+                        rx.input(
+                            name="problems",
+                            placeholder="Your problems",
+                            width="100%",
+                        ),
+                        rx.input(
+                            name="goals",
+                            placeholder="Your goals",
+                            width="100%",
+                        ),
+                        rx.input(
+                            name="weaknesses",
+                            placeholder="Your weaknesses",
+                            width="100%",
+                        ),
+                        rx.input(
+                            name="strength",
+                            placeholder="Your strength",
+                            width="100%",
+                        ),
+                        gap="1rem",
+                        direction="column",
+                    ),
                 ),
-            ),
-            rx.button("Submit", type="submit", margin_top="1rem"),
-            gap="1rem",
-            direction="column",
-            align="center",
-            width='40rem',
-            margin='auto',
+                rx.button("Submit", type="submit", margin_top="1rem"),
+                gap="1rem",
+                direction="column",
+                align="center",
+                width="40rem",
+                margin="auto",
             ),
         ),
         spacing="8",

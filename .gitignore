@@ -52,3 +52,4 @@ assets/external/
 
 # Environment variable file
 .env
+/uploaded_files
