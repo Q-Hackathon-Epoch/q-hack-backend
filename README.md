@@ -1,12 +1,44 @@
-# Run this project with:
+# Welcome to CompassAI
+
+We help you manage your student life better :D
+
+## Getting Started
+
+This project was generated using [Reflex](https://reflex.dev/), a framework for building web applications in Python. Python interpreter must be 3.10 or higher.
+
+### Prerequisites
+
+0. It is recommended to use a virtual environment to manage dependencies. You can create a virtual environment using the following command:
+
+   ```bash
+   python3 -m venv venv
+   ```
+
+1. Activate the virtual environment:
+
+   ```bash
+   # On Linux or MacOS
+   source venv/bin/activate
+
+   # On Windows
+   venv/Scripts/activate
+   ```
+
+2. Install the required dependencies using pip:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Running the Project
+
+To run the project, you can use the `reflex` command. This will start a local development server and open your app in the default web browser.
+
 ```bash
 reflex run
 ```
 
-Python interpreter must be 3.10 or higher, if using venv make sure to activate it first:
-```bash
-source .venv/bin/activate
-```
+---
+
 # Welcome to Reflex!
 
 This is the base Reflex template - installed when you run `reflex init`.
@@ -64,7 +96,6 @@ To add a new page:
 2. Add a new function with the `@template` decorator, which takes the same arguments as `@rx.page`.
 3. Import the page in your `{your_app}/pages/__init__.py` file and it will automatically be added to the app.
 4. Order the pages in `{your_app}/components/sidebar.py` and `{your_app}/components/navbar.py`.
-
 
 ### Adding Components
 
