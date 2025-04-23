@@ -15,12 +15,11 @@ def sidebar_header() -> rx.Component:
     return rx.hstack(
         # The logo.
         rx.color_mode_cond(
-            rx.image(src="/reflex_black.svg", height="3em"),
-            rx.image(src="/reflex_white.svg", height="3em"),
+            rx.image(src="/reflex_black.svg"),
+            rx.image(src="/reflex_white.svg"),
         ),
         rx.spacer(),
         align="center",
-        width="100%",
         padding="0.35em",
         margin_bottom="3em",
     )
@@ -34,18 +33,6 @@ def sidebar_footer() -> rx.Component:
 
     """
     return rx.hstack(
-        rx.link(
-            rx.text("Docs", size="3"),
-            href="https://reflex.dev/docs/getting-started/introduction/",
-            color_scheme="gray",
-            underline="none",
-        ),
-        rx.link(
-            rx.text("Blog", size="3"),
-            href="https://reflex.dev/blog/",
-            color_scheme="gray",
-            underline="none",
-        ),
         rx.spacer(),
         rx.color_mode.button(style={"opacity": "0.8", "scale": "0.95"}),
         justify="start",

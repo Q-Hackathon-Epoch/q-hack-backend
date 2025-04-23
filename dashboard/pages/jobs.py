@@ -104,12 +104,12 @@ def _job_cards() -> rx.Component:
                 rx.text(job["location"], font_size="sm"),
                 rx.text(f"💰 {job['salary']}", font_size="sm", font_weight="semibold"),
                 rx.hstack(
-                    *[rx.badge(ind.strip(), color_scheme="blue") for ind in job["industry"].split(',')],
+                    *[rx.badge(ind.strip(), color_scheme="blue") for ind in job["skills_str"].split(', ')[:2]],
                     wrap="wrap",
                     mt="2"
                 ),
                 # rx.text(f"Skills: {job['skills_str']}", font_size="xs", no_of_lines=2, mt="2"),
-                rx.text(job["pub_str"], font_size="xxs", align_self="flex-end", mt="2", position="absolute", right="3", bottom="0"),
+                rx.text(job["pub_str"], font_size="xxs", align_self="flex-end", mt="2", position="absolute", right="2", bottom="0"),
                 spacing="2",
                 padding="4",
                 width="100%",
@@ -161,7 +161,7 @@ def Jobs() -> rx.Component:
     """The jobs page component with filter controls."""
     return rx.vstack(
         rx.vstack(
-            rx.heading("Let's find a new job for you!", size="9"),
+            rx.heading("Let's find you a new job!", size="9"),
             rx.hstack(
                 rx.cond(
                     State.filter_option == "match",
