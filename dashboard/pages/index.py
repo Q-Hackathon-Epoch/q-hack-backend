@@ -4,43 +4,12 @@ import reflex as rx
 
 from .. import styles
 from ..components.card import card
-from ..components.notification import notification
 from ..templates import template
-from ..views.acquisition_view import acquisition
 from ..views.charts import (
     StatsState,
     area_toggle,
-    orders_chart,
-    pie_chart,
-    revenue_chart,
-    timeframe_select,
-    users_chart,
 )
 from ..views.stats_cards import stats_cards
-from .interview import ProfileState
-
-
-def _time_data() -> rx.Component:
-    return rx.hstack(
-        rx.tooltip(
-            rx.icon("info", size=20),
-            content=f"{(datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%b %d, %Y')} - {datetime.datetime.now().strftime('%b %d, %Y')}",
-        ),
-        rx.text("Last 30 days", size="4", weight="medium"),
-        align="center",
-        spacing="2",
-        display=["none", "none", "flex"],
-    )
-
-
-def tab_content_header() -> rx.Component:
-    return rx.hstack(
-        _time_data(),
-        area_toggle(),
-        align="center",
-        width="100%",
-        spacing="4",
-    )
 
 
 class State(rx.State):
@@ -51,6 +20,32 @@ class State(rx.State):
     modules_filename: str = ""
     transcript_filename: str = ""
     skills_filename: str = ""
+    progress: int = 0  # For progress tracking
+
+    def calculate_progress(self) -> int:
+        """Calculate completion progress based on filled fields"""
+        total_items = 7  # 3 files + 4 text fields
+        filled_items = 0
+
+        # Check file uploads
+        if self.modules_filename:
+            filled_items += 1
+        if self.transcript_filename:
+            filled_items += 1
+        if self.skills_filename:
+            filled_items += 1
+
+        # Check text fields
+        if self.problems:
+            filled_items += 1
+        if self.goals:
+            filled_items += 1
+        if self.weaknesses:
+            filled_items += 1
+        if self.strength:
+            filled_items += 1
+
+        return int((filled_items / total_items) * 100)
 
     async def reset_all(self):
         self.problems = ""
@@ -60,8 +55,22 @@ class State(rx.State):
         self.modules_filename = ""
         self.transcript_filename = ""
         self.skills_filename = ""
+        self.progress = 0
 
     async def handle_submit(self):
+        if (
+            not self.modules_filename
+            or not self.transcript_filename
+            or not self.skills_filename
+            or not self.problems
+            or not self.goals
+            or not self.weaknesses
+            or not self.strength
+        ):
+            return rx.window_alert(
+                "Please complete all fields before submitting"
+            )
+
         content = (
             f"Problems: {self.problems}\n"
             f"Goals: {self.goals}\n"
@@ -69,7 +78,6 @@ class State(rx.State):
             f"Strength: {self.strength}\n"
         )
         upload_dir = rx.get_upload_dir()
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = "students-self-description.txt"
         outfile = upload_dir / filename
         with outfile.open("w", encoding="utf-8") as f:
@@ -77,8 +85,38 @@ class State(rx.State):
         print(f"Form data saved to {filename}")
         return rx.redirect("/dashboard")
 
+    async def _handle_upload_and_set_name(self, files, kind):
+        await self.handle_upload(files)
+        if isinstance(files, list) and files:
+            item = files[0]
+        else:
+            item = files
+        if hasattr(item, "filename"):
+            name = item.filename
+        else:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            name = f"upload_{timestamp}.pdf"
+
+        if kind == "modules":
+            self.modules_filename = name
+        elif kind == "transcript":
+            self.transcript_filename = name
+        elif kind == "skills":
+            self.skills_filename = name
+
+        # Update progress when a file is uploaded
+        self.progress = self.calculate_progress()
+
+    async def handle_upload_modules(self, files):
+        await self._handle_upload_and_set_name(files, "modules")
+
+    async def handle_upload_transcript(self, files):
+        await self._handle_upload_and_set_name(files, "transcript")
+
+    async def handle_upload_skills(self, files):
+        await self._handle_upload_and_set_name(files, "skills")
+
     async def handle_upload(self, files):
-        print(f"Received upload: {type(files)}")
         try:
             if isinstance(files, list):
                 for file in files:
@@ -87,7 +125,9 @@ class State(rx.State):
                         filename = file.filename
                     else:
                         upload_data = file
-                        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                        timestamp = datetime.datetime.now().strftime(
+                            "%Y%m%d_%H%M%S"
+                        )
                         filename = f"upload_{timestamp}.pdf"
                     outfile = rx.get_upload_dir() / filename
                     with outfile.open("wb") as file_object:
@@ -100,7 +140,9 @@ class State(rx.State):
                     filename = file.filename
                 else:
                     upload_data = file
-                    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                    timestamp = datetime.datetime.now().strftime(
+                        "%Y%m%d_%H%M%S"
+                    )
                     filename = f"upload_{timestamp}.pdf"
                 outfile = rx.get_upload_dir() / filename
                 with outfile.open("wb") as file_object:
@@ -109,132 +151,290 @@ class State(rx.State):
         except Exception as e:
             print(f"Error in handle_upload: {type(e).__name__}: {e}")
 
-    async def _handle_upload_and_set_name(self, files, kind):
-        await self.handle_upload(files)
-        if isinstance(files, list):
-            item = files[0]
-        else:
-            item = files
-        if hasattr(item, "filename"):
-            name = item.filename
-        else:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            name = f"upload_{timestamp}.pdf"
-        if kind == "modules":
-            self.modules_filename = name
-        elif kind == "transcript":
-            self.transcript_filename = name
-        elif kind == "skills":
-            self.skills_filename = name
-
-    async def handle_upload_modules(self, files):
-        await self._handle_upload_and_set_name(files, "modules")
-
-    async def handle_upload_transcript(self, files):
-        await self._handle_upload_and_set_name(files, "transcript")
-
-    async def handle_upload_skills(self, files):
-        await self._handle_upload_and_set_name(files, "skills")
+    async def update_text_field(self, value, field_name):
+        setattr(self, field_name, value)
+        self.progress = self.calculate_progress()
 
 
-# @template(route="/", title="Overview", on_load=StatsState.randomize_data)
 @template(
     route="/",
-    title="Upload Your Data",
-    on_load=[StatsState.randomize_data, State.reset_all],
+    title="Let's Get To Know You Better",
+    on_load=[State.reset_all],
 )
 def index() -> rx.Component:
     return rx.vstack(
-        rx.heading("Let's Get To Know You Better", size="9"),
-        rx.form(
-            rx.flex(
-                card(
-                    rx.upload(
-                        rx.cond(
-                            State.modules_filename != "",
-                            rx.text(State.modules_filename, color="green"),
-                            rx.text("Drag & drop your Module Handbook [pdf, html]"),
-                        ),
-                        id="upload_modules",
-                        accept={
-                            "application/pdf": [".pdf"],
-                            "text/html": [".html", ".htm"],
-                        },
-                        on_drop=State.handle_upload_modules,
-                        max_files=1,
-                    ),
-                ),
-                card(
-                    rx.upload(
-                        rx.cond(
-                            State.transcript_filename != "",
-                            rx.text(State.transcript_filename+ "Click to change", color="green"),
-                            rx.text("Drag & drop your academic transcript [pdf, html]"),
-                        ),
-                        id="upload_transcript",
-                        accept={
-                            "application/pdf": [".pdf"],
-                            "text/html": [".html", ".htm"],
-                        },
-                        on_drop=State.handle_upload_transcript,
-                        max_files=1,
-                    ),
-                ),
-                card(
-                    rx.upload(
-                        rx.cond(
-                            State.skills_filename != "",
-                            rx.text(State.skills_filename, color="green"),
-                            rx.text("Drag & drop your LinkedIn / GitHub snapshot [pdf, html]"),
-                        ),
-                        id="upload_skills",
-                        accept={
-                            "application/pdf": [".pdf"],
-                            "text/html": [".html", ".htm"],
-                        },
-                        on_drop=State.handle_upload_skills,
-                        max_files=1,
-                    ),
-                ),
-                card(
-                    rx.flex(
-                        rx.input(
-                            value=State.problems,
-                            on_change=State.set_problems,
-                            placeholder="Your problems",
-                            width="100%",
-                        ),
-                        rx.input(
-                            value=State.goals,
-                            on_change=State.set_goals,
-                            placeholder="Your goals",
-                            width="100%",
-                        ),
-                        rx.input(
-                            value=State.weaknesses,
-                            on_change=State.set_weaknesses,
-                            placeholder="Your weaknesses",
-                            width="100%",
-                        ),
-                        rx.input(
-                            value=State.strength,
-                            on_change=State.set_strength,
-                            placeholder="Your strength",
-                            width="100%",
-                        ),
-                        gap="1rem",
-                        direction="column",
-                    ),
-                ),
-                rx.button("Submit", type="submit", margin_top="1rem"),
-                gap="1rem",
-                direction="column",
-                align="center",
-                width="40rem",
-                margin="auto",
+        # Sticky progress bar container
+        rx.box(
+            rx.progress(
+                value=State.progress,
+                width="100%",
+                color_scheme="green",
+                height="0.5rem",
+                border_radius="md",
             ),
-            on_submit=State.handle_submit,
+            rx.text(
+                f"{State.progress}% Complete",
+                size="2",
+                align="right",
+                margin_top="0.25rem",
+            ),
+            width="100%",
+            padding="1rem",  # Add padding inside the sticky box
+            position="sticky",
+            top="0",
+            z_index="10",
+            background_color=rx.color("gray", 1),  # Add background color
+            box_shadow="0 2px 4px rgba(0,0,0,0.1)",  # Add shadow
+            margin_bottom="1rem",  # Add some margin below the sticky bar
         ),
-        spacing="8",
+        # Main content area
+        rx.vstack(
+            rx.heading(
+                "Let's Get To Know You Better", size="8", margin_bottom="2rem"
+            ),
+            rx.text(
+                "Please provide the following information to help us create a personalized roadmap for your academic and career journey.",
+                size="4",
+                color="gray",
+                margin_bottom="2rem",
+                text_align="center",
+            ),
+            rx.form(
+                rx.vstack(
+                    # Upload section
+                    rx.vstack(
+                        # Module Handbook Upload
+                        card(
+                            rx.vstack(
+                                rx.heading(
+                                    "University Module Handbook",
+                                    size="6",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.text(
+                                    "Please upload your university's module handbook to help us understand what courses are available.",
+                                    size="3",
+                                    color="gray",
+                                ),
+                                rx.upload(
+                                    rx.cond(
+                                        State.modules_filename != "",
+                                        rx.hstack(
+                                            rx.icon("check", color="green"),
+                                            rx.text(
+                                                State.modules_filename,
+                                                color="green",
+                                            ),
+                                            align="center",
+                                        ),
+                                        rx.hstack(
+                                            rx.icon("upload", color="gray"),
+                                            rx.text(
+                                                "Drag & drop module handbook or click to browse"
+                                            ),
+                                            align="center",
+                                        ),
+                                    ),
+                                    id="upload_modules",
+                                    accept={
+                                        "application/pdf": [".pdf"],
+                                        "text/html": [".html", ".htm"],
+                                    },
+                                    on_drop=State.handle_upload_modules,
+                                    max_files=1,
+                                    height="100px",
+                                    border="2px dashed",
+                                    border_color="gray.200",
+                                    border_radius="md",
+                                    padding="1rem",
+                                ),
+                                align_items="start",
+                                width="100%",
+                            ),
+                        ),
+                        # Grade Sheet Upload
+                        card(
+                            rx.vstack(
+                                rx.heading(
+                                    "Academic Transcript/Grade Sheet",
+                                    size="6",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.text(
+                                    "Share your current grades to help us understand what modules you've completed.",
+                                    size="3",
+                                    color="gray",
+                                ),
+                                rx.upload(
+                                    rx.cond(
+                                        State.transcript_filename != "",
+                                        rx.hstack(
+                                            rx.icon("check", color="green"),
+                                            rx.text(
+                                                State.transcript_filename,
+                                                color="green",
+                                            ),
+                                            align="center",
+                                        ),
+                                        rx.hstack(
+                                            rx.icon("upload", color="gray"),
+                                            rx.text(
+                                                "Drag & drop grade sheet or click to browse"
+                                            ),
+                                            align="center",
+                                        ),
+                                    ),
+                                    id="upload_transcript",
+                                    accept={
+                                        "application/pdf": [".pdf"],
+                                        "text/html": [".html", ".htm"],
+                                    },
+                                    on_drop=State.handle_upload_transcript,
+                                    max_files=1,
+                                    height="100px",
+                                    border="2px dashed",
+                                    border_color="gray.200",
+                                    border_radius="md",
+                                    padding="1rem",
+                                ),
+                                align_items="start",
+                                width="100%",
+                            )
+                        ),
+                        # CV/LinkedIn Upload
+                        card(
+                            rx.vstack(
+                                rx.heading(
+                                    "Your Skills & Experience",
+                                    size="6",
+                                    margin_bottom="1rem",
+                                ),
+                                rx.text(
+                                    "Upload your CV or LinkedIn profile export to help us understand your background.",
+                                    size="3",
+                                    color="gray",
+                                ),
+                                rx.upload(
+                                    rx.cond(
+                                        State.skills_filename != "",
+                                        rx.hstack(
+                                            rx.icon("check", color="green"),
+                                            rx.text(
+                                                State.skills_filename,
+                                                color="green",
+                                            ),
+                                            align="center",
+                                        ),
+                                        rx.hstack(
+                                            rx.icon("upload", color="gray"),
+                                            rx.text(
+                                                "Drag & drop CV/LinkedIn export or click to browse"
+                                            ),
+                                            align="center",
+                                        ),
+                                    ),
+                                    id="upload_skills",
+                                    accept={
+                                        "application/pdf": [".pdf"],
+                                        "text/html": [".html", ".htm"],
+                                    },
+                                    on_drop=State.handle_upload_skills,
+                                    max_files=1,
+                                    height="100px",
+                                    border="2px dashed",
+                                    border_color="gray.200",
+                                    border_radius="md",
+                                    padding="1rem",
+                                ),
+                                align_items="start",
+                                width="100%",
+                            )
+                        ),
+                        width="100%",
+                        spacing="8",
+                    ),
+                    # Self-description section
+                    card(
+                        rx.vstack(
+                            rx.heading(
+                                "Tell Us About Yourself",
+                                size="6",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text(
+                                "Please share your strengths, weaknesses, goals, and any challenges you're facing.",
+                                size="3",
+                                color="gray",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text_area(
+                                placeholder="Describe your career goals and aspirations...",
+                                value=State.goals,
+                                on_change=lambda value: State.update_text_field(
+                                    value, "goals"
+                                ),
+                                height="100px",
+                                width="100%",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text_area(
+                                placeholder="Describe your strengths...",
+                                value=State.strength,
+                                on_change=lambda value: State.update_text_field(
+                                    value, "strength"
+                                ),
+                                height="100px",
+                                width="100%",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text_area(
+                                placeholder="Describe areas you'd like to improve...",
+                                value=State.weaknesses,
+                                on_change=lambda value: State.update_text_field(
+                                    value, "weaknesses"
+                                ),
+                                height="100px",
+                                width="100%",
+                                margin_bottom="1rem",
+                            ),
+                            rx.text_area(
+                                placeholder="Describe any challenges you're facing in your academic or career journey...",
+                                value=State.problems,
+                                on_change=lambda value: State.update_text_field(
+                                    value, "problems"
+                                ),
+                                height="100px",
+                                width="100%",
+                            ),
+                            align_items="start",
+                            width="100%",
+                        ),
+                    ),
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("arrow-right"),
+                            rx.text("Let's Go!"),
+                        ),
+                        type="submit",
+                        width="200px",
+                        color_scheme="green",
+                        size="3",
+                        margin_top="2rem",
+                    ),
+                    width="100%",
+                    max_width="800px",
+                    margin="auto",
+                    spacing="8",
+                    padding="1rem",
+                ),
+                on_submit=State.handle_submit,
+                width="100%",
+            ),
+            width="100%",
+            padding="2rem",  # Keep padding for the main content
+            spacing="4",
+        ),
         width="100%",
+        align_items="center",  # Center align items in the outer vstack
+        spacing="0",  # Remove spacing from outer vstack to avoid gap below sticky bar
     )
