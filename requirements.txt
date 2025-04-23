@@ -1,1 +1,6 @@
 reflex==0.7.8
+PyMuPDF
+beautifulsoup4
+pdfplumber
+langchain
+langgraph
