@@ -8,9 +8,7 @@ from dashboard.backend.agents import Prompts
 
 from dashboard.backend.utils.convert_to_text import convert_to_text
 
-
-# for openai also you can use this
-example_schema = {
+basic_schema = {
     "name": "llm_response",
     "schema": {
         "type": "object",
@@ -32,14 +30,11 @@ def get_chat_prompt_template(system, user):
     )
 
 
-llm = AzureChatOpenAI("gpt-4o")
-
-
 class Agents:
     def __init__(self, llm_model: BaseChatModel):
         self.llm = llm_model
 
-    def get_lectures(self, modules_text: str) -> Dict[str, List[str]]:
+    def get_uni_modules(self, modules_text: str):
         prompt_template = get_chat_prompt_template(
             Prompts.system_uni_module_handbook,
             Prompts.user_uni_module_handbook,
@@ -53,17 +48,15 @@ class Agents:
         )
         return result
 
-    def get_grades(self, lectures_mapping: dict, grades_text: str):
+    def get_student_grades(self, uni_module_handbook: str, grades_raw_text: str):
         prompt_template = get_chat_prompt_template(
             Prompts.system_grade_sheet, Prompts.user_grade_sheet
         )
-        chain = prompt_template | self.llm.with_structured_output(
-            example_schema
-        )
+        chain = prompt_template | self.llm | StrOutputParser()
         result = chain.invoke(
             {
-                "lectures_mapping": lectures_mapping,
-                "grades_text": grades_text,
+                "uni_module_handbook": uni_module_handbook,
+                "grades_raw_text": grades_raw_text,
             }
         )
         return result
