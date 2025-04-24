@@ -68,8 +68,8 @@ def sidebar_item(text: str, url: str) -> rx.Component:
                 text,
                 ("Upload Your Data", sidebar_item_icon("home")),
                 ("Your Roadmap", sidebar_item_icon("table-2")),
-                ("Your jobs", sidebar_item_icon("book-open")),
-                ("Mock Interview Preporation", sidebar_item_icon("user")),
+                ("Your Jobs", sidebar_item_icon("book-open")),
+                ("Mock Interview Preparation", sidebar_item_icon("user")),
                 ("Settings", sidebar_item_icon("settings")),
                 sidebar_item_icon("layout-dashboard"),
             ),
@@ -149,7 +149,9 @@ def sidebar() -> rx.Component:
             rx.vstack(
                 *[
                     sidebar_item(
-                        text=page.get("title", page["route"].strip("/").capitalize()),
+                        text=page.get(
+                            "title", page["route"].strip("/").capitalize()
+                        ),
                         url=page["route"],
                     )
                     for page in ordered_pages
