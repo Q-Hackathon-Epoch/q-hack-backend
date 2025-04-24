@@ -84,7 +84,6 @@ btn.addEventListener('click', toggleConversation);
 # Page UI: two buttons and status text
 # ---------------------------------------------------------------------------
 @template(route="/interview", title="Mock Interview Preparation")
-@template(route="/interview", title="Mock Interview Preparation")
 def Interview() -> rx.Component:
     return rx.vstack(
         rx.heading("Let's get you ready for your interview!", size="9", margin_bottom="3rem"),
