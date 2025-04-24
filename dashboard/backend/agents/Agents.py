@@ -85,5 +85,35 @@ class Agents:
         )
         return result
     
-    def get_personalized_jobs(self):
-        pass
+
+    # output agents
+    def get_personalized_jobs(self, cv_json, grade_sheet_json, self_description_json, job_postings_json):
+        prompt_template = get_chat_prompt_template(
+            Prompts.system_jobs_finder, Prompts.user_jobs_finder
+        )
+        chain = prompt_template | self.llm | StrOutputParser()
+        result = chain.invoke(
+            {
+                "cv_json": cv_json,
+                "grade_sheet_json": grade_sheet_json,
+                "self_description_json": self_description_json,
+                "job_postings_json": job_postings_json,
+            }
+        )
+        return result
+
+
+    def get_upskill_roadmap(self, uni_module_handbook_json, grade_sheet_json, cv_json, self_description_json):
+        prompt_template = get_chat_prompt_template(
+            Prompts.system_self_description, Prompts.user_self_description
+        )
+        chain = prompt_template | self.llm | StrOutputParser()
+        result = chain.invoke(
+            {
+                "uni_module_handbook_json": uni_module_handbook_json,
+                "grade_sheet_json": grade_sheet_json,
+                "cv_json": cv_json,
+                "self_description_json": self_description_json,
+            }
+        )
+        return result

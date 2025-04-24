@@ -8,3 +8,5 @@ azure-ai-projects
 langchain-openai
 openai
 python-dotenv
+elevenlabs
+#pip install "fastrtc[vad, stt, tts]"

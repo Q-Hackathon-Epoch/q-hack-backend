@@ -15,7 +15,44 @@ load_dotenv(dotenv_path=env_path)
 AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 # AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 
+# from elevenlabs.client import ElevenLabs
+# from elevenlabs.conversational_ai.conversation import Conversation, ConversationConfig
+# from elevenlabs.conversational_ai.default_audio_interface import DefaultAudioInterface
+# import signal
+# import fastrtc
 
+# config = ConversationConfig(
+#   dynamic_variables={
+#       'company_name': 'Microsoft',
+#       'interviewer_background':'',
+#       'name':'Simone',
+#       'candidate_profile':'',
+#   }
+# )
+
+# agent_id = os.getenv("AGENT_ID")
+# api_key = os.getenv("ELEVENLABS_API_KEY")
+# client = ElevenLabs(api_key=api_key)
+
+# conversation = Conversation(
+#   client,
+#   agent_id,
+#   config=config,
+#   # Assume auth is required when API_KEY is set.
+#   requires_auth=bool(api_key),
+#   # Use the default audio interface.
+#   audio_interface=DefaultAudioInterface(),
+#   # Simple callbacks that print the conversation to the console.
+#   callback_agent_response=lambda response: print(f"Agent: {response}"),
+#   callback_agent_response_correction=lambda original, corrected: print(f"Agent: {original} -> {corrected}"),
+#   callback_user_transcript=lambda transcript: print(f"User: {transcript}"),
+#   # Uncomment the below if you want to see latency measurements.
+#   # callback_latency_measurement=lambda latency: print(f"Latency: {latency}ms"),
+# )
+
+# conversation.start_session()
+
+# signal.signal(signal.SIGINT, lambda sig, frame: conversation.end_session())
 # ---------------------------------------------------------------------------
 # State: track session object on window only, UI updated via JS
 # ---------------------------------------------------------------------------

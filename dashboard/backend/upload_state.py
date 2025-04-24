@@ -22,14 +22,17 @@ agent_responses = {
     'grades_response': None,
     'cv_summary': None,
     'student_skills': None,
+    'job_offers_response': None,
+    'roadmap_response': None,
 }
 
-def trigger_pipeline(self_description: str):
+def trigger_pipeline():
 
     modules_path = './uploaded_files/module_handbook.pdf'
     grades_path = './uploaded_files/grade_sheet.pdf'
     cv_path = './uploaded_files/student_cv.pdf'
     description_path = './uploaded_files/students-self-description.txt'
+    job_offers_path = './test_data/jobs.json'
 
 
     modules_input = convert_to_text(modules_path)
@@ -39,24 +42,30 @@ def trigger_pipeline(self_description: str):
 
     grades_input = convert_to_text(grades_path)
     grades_response = agents.get_student_grades(modules_response, grades_input)
+    agent_responses['grades_response'] = grades_response
 
 
     cv_input = convert_to_text(cv_path)
     cv_summary = agents.get_cv_summary(cv_input)
     agent_responses['cv_summary'] = cv_summary
 
-
     print(cv_summary)
 
-
+    with open(description_path, 'r') as file:
+        self_description = file.read()
     student_skills = agents.get_self_description(self_description)
     agent_responses['student_skills'] = student_skills
     print(student_skills)
 
+    with open(job_offers_path, 'r') as file:
+        job_offers = file.read()
+    job_offers_response = agents.get_personalized_jobs
+    agent_responses['job_offers_response'] = job_offers_response
+    print(job_offers_response)
+
+    roadmap_response = agents.get_upskill_roadmap(modules_response, grades_response, cv_summary, student_skills, job_offers_response)
+    agent_responses['roadmap_response'] = roadmap_response
+    print(roadmap_response)
+
     return agent_responses
-
-# todo: cv pdf
-
-    def compute_roadmap():
-        pass
         

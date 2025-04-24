@@ -259,3 +259,21 @@ Format the output as structured array in the following example format:
 ]
 
 """
+
+user_upskill_roadmap = """
+Here is the structured information from the job postings:
+{uni_module_handbook_json}
+
+Here is the structured information from the student's grade sheet:
+{grade_sheet_json}
+
+Here is the structured information from the student's CV:
+{cv_json}
+
+Here is the structured information from the student's self description:
+{self_description_json}
+
+
+
+Please analyse all the relevant information, then return the desired output in a structured format as specified in the system prompt.
+"""
