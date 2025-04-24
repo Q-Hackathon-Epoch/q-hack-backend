@@ -1,15 +1,9 @@
 import csv
 from pathlib import Path
 from typing import List
-from dashboard.backend.utils.convert_to_text import convert_to_text
-
-from langchain_openai.chat_models import AzureChatOpenAI
-from dashboard.backend.agents.Agents import Agents
 
 import reflex as rx
-from dotenv import load_dotenv
-import os
-load_dotenv()
+
 
 class Item(rx.Base):
     """The item class."""
@@ -18,40 +12,6 @@ class Item(rx.Base):
     payment: float
     date: str
     status: str
-api_key = os.environ['AZURE_OPENAI_TOKEN']
-
-llm_model = AzureChatOpenAI(model='gpt-4.1-mini-2',
-                        api_key=os.environ['AZURE_OPENAI_TOKEN'],
-                        api_version='2024-12-01-preview', 
-                        azure_endpoint="https://subad-m9u2eiah-eastus2.cognitiveservices.azure.com/")
-agents = Agents(llm_model)
-class ProcessingState(rx.State):
-    modules_path = ''
-    grades_path = ''
-
-    @rx.var(cache=True)
-    def current_modules_response(self) -> str:
-        if self.modules_path == '':
-            return ''
-        modules_input = convert_to_text(self.modules_path)
-        result = agents.get_uni_modules(modules_input)
-        #print(result)
-        return result
-
-    @rx.var(cache=True)
-    def current_grades_response(self) -> str:
-        if self.grades_path == '' or self.modules_path == '':
-            return ''
-        grades_input = convert_to_text(self.grades_path)
-        result = agents.get_student_grades(self.current_modules_response, grades_input)
-        print(result)
-        return result
-
-# todo: cv pdf
-
-    def compute_roadmap():
-        pass
-        
 
 class TableState(rx.State):
     """The state class."""

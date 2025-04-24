@@ -2,13 +2,12 @@
 
 import reflex as rx
 
-from ..backend.table_state import TableState
 from ..templates import template
 from ..views.table import main_table
 
 
 @template(
-    route="/roadmap", title="Your Roadmaps", on_load=TableState.load_entries
+    route="/roadmap", title="Your Roadmaps",
 )
 def Roadmap() -> rx.Component:
     """The table page.
