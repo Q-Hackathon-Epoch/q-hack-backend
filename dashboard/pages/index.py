@@ -10,6 +10,7 @@ from ..views.charts import (
     area_toggle,
 )
 from ..views.stats_cards import stats_cards
+from dashboard.backend.upload_state import trigger_pipeline
 
 
 class State(rx.State):
@@ -83,6 +84,7 @@ class State(rx.State):
         with outfile.open("w", encoding="utf-8") as f:
             f.write(content)
         print(f"Form data saved to {filename}")
+        trigger_pipeline()
         return rx.redirect("/jobs")
 
     async def _handle_upload_and_set_name(self, files, kind):
@@ -129,6 +131,13 @@ class State(rx.State):
                     with outfile.open("wb") as file_object:
                         file_object.write(upload_data)
                     print(f"The file {filename} was uploaded")
+                    # print(kind)
+                    # if kind == "module_handbook":
+                    #     ProcessingState.modules_path = './uploaded_files/' + filename #update_modules_response('./uploaded_files/' + filename)
+                    # elif kind == "grade_sheet":
+                    #     ProcessingState.grades_path = './uploaded_files/' + filename #update_grades_response('./uploaded_files/' + filename)
+                    # elif kind == "student_cv":
+                    #     pass
             else:
                 file = files
                 if hasattr(file, "read"):
