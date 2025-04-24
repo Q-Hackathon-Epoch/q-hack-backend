@@ -86,7 +86,7 @@ class State(rx.State):
         return rx.redirect("/jobs")
 
     async def _handle_upload_and_set_name(self, files, kind):
-        await self.handle_upload(files)
+        await self.handle_upload(files, kind)
         if isinstance(files, list) and files:
             item = files[0]
         else:
@@ -115,7 +115,7 @@ class State(rx.State):
     async def handle_upload_skills(self, files):
         await self._handle_upload_and_set_name(files, "student_cv")
 
-    async def handle_upload(self, files):
+    async def handle_upload(self, files, kind):
         try:
             if isinstance(files, list):
                 for file in files:
@@ -124,10 +124,7 @@ class State(rx.State):
                         filename = file.filename
                     else:
                         upload_data = file
-                        timestamp = datetime.datetime.now().strftime(
-                            "%Y%m%d_%H%M%S"
-                        )
-                        filename = f"upload_{timestamp}.pdf"
+                        filename = f"{kind}.pdf"
                     outfile = rx.get_upload_dir() / filename
                     with outfile.open("wb") as file_object:
                         file_object.write(upload_data)
@@ -139,10 +136,7 @@ class State(rx.State):
                     filename = file.filename
                 else:
                     upload_data = file
-                    timestamp = datetime.datetime.now().strftime(
-                        "%Y%m%d_%H%M%S"
-                    )
-                    filename = f"upload_{timestamp}.pdf"
+                    filename = f"{kind}.pdf"
                 outfile = rx.get_upload_dir() / filename
                 with outfile.open("wb") as file_object:
                     file_object.write(upload_data)
