@@ -15,21 +15,17 @@ load_dotenv(dotenv_path=env_path)
 AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 # AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 
-
 # ---------------------------------------------------------------------------
 # State: track session object on window only, UI updated via JS
 # ---------------------------------------------------------------------------
 class VoiceState(rx.State):
     """Dummy state to allow script injection on page."""
-
     pass
-
 
 # ---------------------------------------------------------------------------
 # Conversation JS logic using @11labs/client
 # ---------------------------------------------------------------------------
-conv_js = rx.script(
-    f"""
+conv_js = rx.script(f"""
 import {{ Conversation }} from 'https://cdn.jsdelivr.net/npm/@11labs/client/+esm';
 
 const btn         = document.getElementById('voiceBtn');
@@ -52,6 +48,7 @@ async function toggleConversation() {{
     status.textContent   = 'Disconnected';
     // цвет → зелёный
     btn.classList.remove('bg-red-500');
+    btn.classList.add   ('bg-green-500');
     return;
   }}
 
@@ -68,10 +65,11 @@ async function toggleConversation() {{
     { 'opts.signedUrl = await getSignedUrl();' if os.getenv('USE_SIGNED_URL') else '' }
 
     conv = await Conversation.startSession(opts);
-    btn.textContent = 'STOP';
+    btn.textContent = 'Stop';
     // цвет → красный
     // btn.classList.replace('bg-green-500', 'bg-red-500');
-    btn.classList.add('bg-red-500');
+    btn.classList.remove('bg-green-500');
+    btn.classList.add   ('bg-red-500');
   }} catch(err) {{
     console.error('Failed to start conversation', err);
   }}
@@ -95,7 +93,7 @@ def Interview() -> rx.Component:
                 padding="3rem",
                 margin="5px",
                 borderRadius="9999px",
-                className=" text-white hover:opacity-90 transition",  # <- здесь
+                className="bg-green-500 text-white hover:opacity-90 transition",  # <- здесь
             ),
             rx.hstack(
                 rx.text("Status: ", as_="span"),
@@ -114,4 +112,3 @@ def Interview() -> rx.Component:
         conv_js,
         width="100%",
     )
-
