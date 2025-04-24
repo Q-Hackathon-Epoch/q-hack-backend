@@ -1,4 +1,5 @@
 import datetime
+import asyncio
 
 import reflex as rx
 
@@ -84,7 +85,15 @@ class State(rx.State):
         with outfile.open("w", encoding="utf-8") as f:
             f.write(content)
         print(f"Form data saved to {filename}")
-        trigger_pipeline()
+
+        # --- fire pipeline off in the background ---
+        loop = asyncio.get_event_loop()
+        # if trigger_pipeline is synchronous/CPU-bound, offload to thread-pool:
+        loop.run_in_executor(None, trigger_pipeline)
+        # if trigger_pipeline is async, instead do:
+        # asyncio.create_task(trigger_pipeline())
+
+        # immediately redirect while the pipeline runs
         return rx.redirect("/jobs")
 
     async def _handle_upload_and_set_name(self, files, kind):

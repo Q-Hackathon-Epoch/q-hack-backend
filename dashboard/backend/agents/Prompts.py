@@ -205,11 +205,13 @@ job descriptions, required skills, and other relevant details.
 Based on these 4 inputs, your main task is to analyze the student's qualifications, experiences, interests, strengths, and the 
 overall student profile to match them with the most suitable job postings.
 
-You must then return a list of the ids of the relevant job postings that match the student's profile. For example, if the student is 
+You must then return a list of the ids of the relevant job postings, wrapped in a json format, that match the student's profile. For example, if the student is 
 interested in a job in data science, and his profile suits it and the job postings contain positions in data science (id 3, 6, and 8), 
 software engineering (id 4, 5) and cloud technologies (id 7, 9), you must return the following:
-   
-[3, 6, 8]
+
+{{
+  "jobs": [3, 6, 8]
+}}
 """
 
 

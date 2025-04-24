@@ -8,12 +8,24 @@ from dashboard.backend.agents import Prompts
 
 from dashboard.backend.utils.convert_to_text import convert_to_text
 
-basic_schema = {
+from pydantic import BaseModel, Field
+from typing import List
+
+class jobSchema(BaseModel):
+    answer: List[int] = Field(description='A list of the job offer indices')
+
+class roadmapSchema(BaseModel):
+    answer: List[str] = Field(description='A list of the tasks to do')
+
+jobs_schema = {
     "name": "llm_response",
     "schema": {
         "type": "object",
         "properties": {
-            "answer": {"type": "string", "description": "The final json."},
+            "answer": {"type": "array",
+                       "description": "The relevant jobs indecies.",
+                       "items": {
+                           "type": "number",},
         },
         "required": [
             "answer",
@@ -21,6 +33,28 @@ basic_schema = {
         "additionalProperties": False,
     },
     "strict": True,
+    }
+}
+
+roadmap_schema = {
+    "name":"llm_response",
+    "schema":{
+        "type":"object",
+        "properties":{
+            "answer":{
+                "type":"array",
+                "description":"The task of the roadmap.",
+                "items":{
+                "type":"string"
+                }
+            },
+            "required":[
+                "answer"
+            ],
+            "additionalProperties":False
+        },
+        "strict":True
+    }
 }
 
 
@@ -87,28 +121,13 @@ class Agents:
     
 
     # output agents
-    jobs_schema = {
-    "name": "llm_response",
-    "schema": {
-        "type": "object",
-        "properties": {
-            "answer": {"type": "array",
-                       "description": "The relevant jobs indecies.",
-                       "items": {
-                           "type": "integer",},
-        },
-        "required": [
-            "answer",
-        ],
-        "additionalProperties": False,
-    },
-    "strict": True,}}
+    
     
     def get_personalized_jobs(self, cv_json, grade_sheet_json, self_description_json, job_postings_json):
         prompt_template = get_chat_prompt_template(
             Prompts.system_jobs_finder, Prompts.user_jobs_finder
         )
-        chain = prompt_template | self.llm.with_structured_output(jobs_schema)
+        chain = prompt_template | self.llm.with_structured_output(jobSchema)
         result = chain.invoke(
             {
                 "cv_json": cv_json,
@@ -117,29 +136,13 @@ class Agents:
                 "job_postings_json": job_postings_json,
             }
         )
-        return result
+        return result.answer
 
-    roadmap_schema = {
-    "name": "llm_response",
-    "schema": {
-        "type": "object",
-        "properties": {
-            "answer": {"type": "array",
-                       "description": "The task of the roadmap.",
-                       "items": {
-                           "type": "string",},
-        },
-        "required": [
-            "answer",
-        ],
-        "additionalProperties": False,
-    },
-    "strict": True,}}
     def get_upskill_roadmap(self, uni_module_handbook_json, grade_sheet_json, cv_json, self_description_json):
         prompt_template = get_chat_prompt_template(
-            Prompts.system_self_description, Prompts.user_self_description
+            Prompts.system_upskill_roadmap, Prompts.user_upskill_roadmap
         )
-        chain = prompt_template | self.llm.with_structured_output(roadmap_schema)
+        chain = prompt_template | self.llm.with_structured_output(roadmapSchema)
         result = chain.invoke(
             {
                 "uni_module_handbook_json": uni_module_handbook_json,
@@ -148,4 +151,4 @@ class Agents:
                 "self_description_json": self_description_json,
             }
         )
-        return result
+        return result.answer

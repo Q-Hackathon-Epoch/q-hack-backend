@@ -7,15 +7,16 @@ from ..components.card import card
 import reflex as rx
 
 from ..templates import template
+from ..backend.upload_state import agent_responses
 
 
 class State(rx.State):
     """Stores current filter option for the jobs page and matched job IDs."""
 
     # По умолчанию показываем "For you"
-    filter_option: str = "match"
+    filter_option: str = "all"
     # Пример списка подходящих вакансий по их ID
-    matched_ids: list[int] = [1, 3, 7, 10]
+    matched_ids: list[int] = agent_responses["job_offers_response"]
 
     def set_filter(self, option: str):
         """Update selected filter option."""
@@ -120,15 +121,15 @@ def _job_cards() -> rx.Component:
                     mt="2",
                 ),
                 # rx.text(f"Skills: {job['skills_str']}", font_size="xs", no_of_lines=2, mt="2"),
-                rx.text(
-                    job["pub_str"],
-                    font_size="xxs",
-                    align_self="flex-end",
-                    mt="2",
-                    position="absolute",
-                    right="2",
-                    bottom="0",
-                ),
+                # rx.text(
+                #     job["pub_str"],
+                #     font_size="xxs",
+                #     align_self="flex-end",
+                #     mt="2",
+                #     position="absolute",
+                #     right="2",
+                #     bottom="0",
+                # ),
                 spacing="2",
                 padding="4",
                 width="100%",

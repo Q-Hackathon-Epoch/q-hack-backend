@@ -3,6 +3,7 @@ from pathlib import Path
 import reflex as rx
 
 from ..templates import template
+from ..backend.upload_state import agent_responses
 
 
 class State(rx.State):
@@ -29,19 +30,14 @@ class State(rx.State):
 #     Path(__file__).resolve().parent.parent / "test_data" / "steps.json"
 # )
 
-DATA_PATH = (
-    Path(__file__).resolve().parent.parent / "test_data" / "roadmap.json"
-)
+# DATA_PATH = (
+#     Path(__file__).resolve().parent.parent / "test_data" / "roadmap.json"
+# )
 
 
 def _load_steps() -> list[dict]:
     """Загружает список шагов из JSON и нормализует для отображения."""
-    try:
-        with open(DATA_PATH, encoding="utf-8") as f:
-            steps = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
-
+    steps = agent_responses["roadmap_response"]
     normalized = []
     for step in steps:
         # Каждый шаг — это просто строка описания или объект с полями

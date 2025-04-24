@@ -22,8 +22,8 @@ agent_responses = {
     'grades_response': None,
     'cv_summary': None,
     'student_skills': None,
-    'job_offers_response': None,
-    'roadmap_response': None,
+    'job_offers_response': [],
+    'roadmap_response': [],
 }
 
 def trigger_pipeline():
@@ -32,7 +32,7 @@ def trigger_pipeline():
     grades_path = './uploaded_files/grade_sheet.pdf'
     cv_path = './uploaded_files/student_cv.pdf'
     description_path = './uploaded_files/students-self-description.txt'
-    job_offers_path = './test_data/jobs.json'
+    job_offers_path = './dashboard/test_data/jobs.json'
 
 
     modules_input = convert_to_text(modules_path)
@@ -59,11 +59,11 @@ def trigger_pipeline():
 
     with open(job_offers_path, 'r') as file:
         job_offers = file.read()
-    job_offers_response = agents.get_personalized_jobs
+    job_offers_response = agents.get_personalized_jobs(cv_summary, grades_response, student_skills, job_offers)
     agent_responses['job_offers_response'] = job_offers_response
     print(job_offers_response)
 
-    roadmap_response = agents.get_upskill_roadmap(modules_response, grades_response, cv_summary, student_skills, job_offers_response)
+    roadmap_response = agents.get_upskill_roadmap(modules_response, grades_response, cv_summary, student_skills)
     agent_responses['roadmap_response'] = roadmap_response
     print(roadmap_response)
 
