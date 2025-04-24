@@ -61,15 +61,29 @@ class Agents:
         )
         return result
     
-    # def get_cv_extracted(self, uni_module_handbook: str, grades_raw_text: str):
-    #     prompt_template = get_chat_prompt_template(
-    #         Prompts.system_grade_sheet, Prompts.user_grade_sheet
-    #     )
-    #     chain = prompt_template | self.llm | StrOutputParser()
-    #     result = chain.invoke(
-    #         {
-    #             "uni_module_handbook": uni_module_handbook,
-    #             "grades_raw_text": grades_raw_text,
-    #         }
-    #     )
-    #     return result
+    def get_cv_summary(self, cv_raw_text: str):
+        prompt_template = get_chat_prompt_template(
+            Prompts.system_cv, Prompts.user_cv
+        )
+        chain = prompt_template | self.llm | StrOutputParser()
+        result = chain.invoke(
+            {
+                "cv_raw_text": cv_raw_text,
+            }
+        )
+        return result
+
+    def get_self_description(self, questionnaire_raw_text: str):
+        prompt_template = get_chat_prompt_template(
+            Prompts.system_self_description, Prompts.user_self_description
+        )
+        chain = prompt_template | self.llm | StrOutputParser()
+        result = chain.invoke(
+            {
+                "questionnaire_raw_text": questionnaire_raw_text,
+            }
+        )
+        return result
+    
+    def get_personalized_jobs(self):
+        pass

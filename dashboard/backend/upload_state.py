@@ -17,25 +17,43 @@ llm_model = AzureChatOpenAI(model='gpt-4.1-mini-2',
                         azure_endpoint="https://subad-m9u2eiah-eastus2.cognitiveservices.azure.com/")
 agents = Agents(llm_model)
 
+agent_responses = {
+    'modules_response': None,
+    'grades_response': None,
+    'cv_summary': None,
+    'student_skills': None,
+}
 
-def trigger_pipeline():
+def trigger_pipeline(self_description: str):
 
     modules_path = './uploaded_files/module_handbook.pdf'
     grades_path = './uploaded_files/grade_sheet.pdf'
+    cv_path = './uploaded_files/student_cv.pdf'
+    description_path = './uploaded_files/students-self-description.txt'
 
-    #print('calling llm')
 
     modules_input = convert_to_text(modules_path)
     modules_response = agents.get_uni_modules(modules_input)
-    #print(result)
+    agent_responses['modules_response'] = modules_response
 
-    #print('calling llm')
+
     grades_input = convert_to_text(grades_path)
     grades_response = agents.get_student_grades(modules_response, grades_input)
-    #print(result)
 
 
-    return None
+    cv_input = convert_to_text(cv_path)
+    cv_summary = agents.get_cv_summary(cv_input)
+    agent_responses['cv_summary'] = cv_summary
+
+
+    print(cv_summary)
+
+
+    student_skills = agents.get_self_description(self_description)
+    agent_responses['student_skills'] = student_skills
+    print(student_skills)
+
+    return agent_responses
 
 # todo: cv pdf
 
