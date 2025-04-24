@@ -60,3 +60,16 @@ class Agents:
             }
         )
         return result
+    
+    # def get_cv_extracted(self, uni_module_handbook: str, grades_raw_text: str):
+    #     prompt_template = get_chat_prompt_template(
+    #         Prompts.system_grade_sheet, Prompts.user_grade_sheet
+    #     )
+    #     chain = prompt_template | self.llm | StrOutputParser()
+    #     result = chain.invoke(
+    #         {
+    #             "uni_module_handbook": uni_module_handbook,
+    #             "grades_raw_text": grades_raw_text,
+    #         }
+    #     )
+    #     return result
