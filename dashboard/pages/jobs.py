@@ -23,9 +23,7 @@ class State(rx.State):
 
 
 # Путь к JSON с данными вакансий
-DATA_PATH = (
-    Path(__file__).resolve().parent.parent / "test_data" / "jobs.json"
-)
+DATA_PATH = Path(__file__).resolve().parent.parent / "test_data" / "jobs.json"
 
 
 def _load_jobs() -> list[dict]:
@@ -43,9 +41,7 @@ def _load_jobs() -> list[dict]:
         skills_str = ", ".join(skills)
 
         loc = job.get("location", {})
-        location_str = ", ".join(
-            [loc.get("city", ""), loc.get("country", "")]
-        )
+        location_str = ", ".join([loc.get("city", ""), loc.get("country", "")])
 
         sal = job.get("salary", {})
         min_s = sal.get("min")
@@ -61,19 +57,21 @@ def _load_jobs() -> list[dict]:
         pub_date = job.get("publication_date", "")
         pub_str = f"{pub_date}" if pub_date else ""
 
-        normalized.append({
-            "id": job.get("id"),
-            "title": job.get("title", ""),
-            "company": job.get("company", ""),
-            "location": location_str,
-            "salary": salary_str,
-            "type": job.get("employment_type", ""),
-            "level": job.get("experience_level", ""),
-            "industry": job.get("industry", ""),
-            "skills_str": skills_str,
-            "remote_str": remote_str,
-            "pub_str": pub_str,
-        })
+        normalized.append(
+            {
+                "id": job.get("id"),
+                "title": job.get("title", ""),
+                "company": job.get("company", ""),
+                "location": location_str,
+                "salary": salary_str,
+                "type": job.get("employment_type", ""),
+                "level": job.get("experience_level", ""),
+                "industry": job.get("industry", ""),
+                "skills_str": skills_str,
+                "remote_str": remote_str,
+                "pub_str": pub_str,
+            }
+        )
     return normalized
 
 
@@ -82,9 +80,9 @@ def _job_cards() -> rx.Component:
     jobs = _load_jobs()
     cards = []
     for job in jobs:
-        show_var = (
-            (State.filter_option == "all")
-            | ((State.filter_option == "match") & State.matched_ids.contains(job["id"]))
+        show_var = (State.filter_option == "all") | (
+            (State.filter_option == "match")
+            & State.matched_ids.contains(job["id"])
         )
 
         # Build the card content
@@ -99,17 +97,38 @@ def _job_cards() -> rx.Component:
                 top="0",
             ),
             rx.vstack(
-                rx.text(job["title"], font_size="lg", font_weight="bold", no_of_lines=2, margin_top="1rem"),
+                rx.text(
+                    job["title"],
+                    font_size="lg",
+                    font_weight="bold",
+                    no_of_lines=2,
+                    margin_top="1rem",
+                ),
                 rx.text(job["company"], font_size="md"),
                 rx.text(job["location"], font_size="sm"),
-                rx.text(f"💰 {job['salary']}", font_size="sm", font_weight="semibold"),
+                rx.text(
+                    f"💰 {job['salary']}",
+                    font_size="sm",
+                    font_weight="semibold",
+                ),
                 rx.hstack(
-                    *[rx.badge(ind.strip(), color_scheme="blue") for ind in job["skills_str"].split(', ')[:2]],
+                    *[
+                        rx.badge(ind.strip(), color_scheme="blue")
+                        for ind in job["skills_str"].split(", ")[:2]
+                    ],
                     wrap="wrap",
-                    mt="2"
+                    mt="2",
                 ),
                 # rx.text(f"Skills: {job['skills_str']}", font_size="xs", no_of_lines=2, mt="2"),
-                rx.text(job["pub_str"], font_size="xxs", align_self="flex-end", mt="2", position="absolute", right="2", bottom="0"),
+                rx.text(
+                    job["pub_str"],
+                    font_size="xxs",
+                    align_self="flex-end",
+                    mt="2",
+                    position="absolute",
+                    right="2",
+                    bottom="0",
+                ),
                 spacing="2",
                 padding="4",
                 width="100%",
@@ -128,21 +147,19 @@ def _job_cards() -> rx.Component:
             position="relative",
         )
 
-        cards.append(
-            rx.cond(show_var, card_wrapper, rx.fragment())
-        )
+        cards.append(rx.cond(show_var, card_wrapper, rx.fragment()))
 
     # Responsive grid template from example
     grid = rx.grid(
         *cards,
         gap="2rem",
         grid_template_columns=[
-            "1fr",            # Mobile: 1 column
-            "repeat(2, 1fr)", # Tablet: 2 columns
-            "repeat(3, 1fr)", # Desktop: 3 columns
+            "1fr",  # Mobile: 1 column
+            "repeat(2, 1fr)",  # Tablet: 2 columns
+            "repeat(3, 1fr)",  # Desktop: 3 columns
         ],
         width="100%",
-        margin_top="1rem"
+        margin_top="1rem",
     )
 
     # Wrap grid in a centered box instead of container
@@ -155,8 +172,7 @@ def _job_cards() -> rx.Component:
     )
 
 
-
-@template(route="/jobs", title="Your jobs")
+@template(route="/jobs", title="Your Jobs")
 def Jobs() -> rx.Component:
     """The jobs page component with filter controls."""
     return rx.vstack(
@@ -197,9 +213,7 @@ def Jobs() -> rx.Component:
             align_items="stretch",
             width="100%",
         ),
-
         _job_cards(),
-
         spacing="2",
         padding="2",
         align_items="stretch",

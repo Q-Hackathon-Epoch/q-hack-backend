@@ -67,7 +67,7 @@ def sidebar_item(text: str, url: str) -> rx.Component:
             rx.match(
                 text,
                 ("Upload Your Data", sidebar_item_icon("home")),
-                ("Your Roadmap", sidebar_item_icon("table-2")),
+                ("Your Roadmaps", sidebar_item_icon("table-2")),
                 ("Your Jobs", sidebar_item_icon("book-open")),
                 ("Mock Interview Preparation", sidebar_item_icon("user")),
                 ("Settings", sidebar_item_icon("settings")),

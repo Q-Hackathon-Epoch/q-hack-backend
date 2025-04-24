@@ -16,13 +16,13 @@ For the given University Module Handbook:
    - Prerequisites for participation
 
 2. Format output as JSON in the following example format:
-{
+{{
    "module_name":"Causality for Artificial Intelligence and Machine Learning",
    "credit_points":3,
-   "workload":{
+   "workload":{{
       "total_hours":90,
       "self_study_hours":60
-   },
+   }},
    "teaching_content":[
       "Introduction and motivation to Pearlian causality and causality for AI & ML",
       "From statistical to causal learning",
@@ -42,7 +42,7 @@ For the given University Module Handbook:
       "Comprehend fundamentals of Pearlian causality",
       "Apply causal inference techniques to improve sample efficiency, robustness, and generalization"
    ],
-   "prerequisites":{
+   "prerequisites":{{
       "required":[
          "Basic probability theory and statistics (e.g. 'Mathematics III for Computer Science')",
          "At least one of: 'Statistical Machine Learning', 'Introduction to Artificial Intelligence', 'Probabilistic Graphical Models', 'Deep Learning', or related Praktika"
@@ -50,8 +50,8 @@ For the given University Module Handbook:
       "recommended":[
          "Basic knowledge of graphical models (e.g. 'Probabilistic Graphical Models')"
       ]
-   }
-}
+   }}
+}}
 """
 
 user_uni_module_handbook = """
@@ -77,7 +77,7 @@ the modules with the corresponding module handbook data to extract the skills ac
 Finally, you must provide structured output about the grades and the skills acquired by the student based on the Module completed.
 
 Format output as JSON in the following example format:
-{
+{{
    "module_name": "Causality for Artificial Intelligence and Machine Learning",
    "grade": "2.0",
    "skills_acquired":[
@@ -86,7 +86,7 @@ Format output as JSON in the following example format:
       "Comprehend fundamentals of Pearlian causality",
       "Apply causal inference techniques to improve sample efficiency, robustness, and generalization"
    ]
-}
+}}
 """
 
 user_grade_sheet = """
@@ -111,22 +111,22 @@ Based on the CV, your main task is to analyze the student's qualifications and e
 that can be matched with potential job postings.
 
 Format the extracted output as structured JSON in the following example format:
-{
+{{
    "name": "John Doe",
    "education": [
-      {
+      {{
          "degree": "Bachelor of Science",
          "field": "Computer Science",
          "institution": "University XYZ",
          "year": 2020
-      }
+      }}
    ],
    "skills": [
       "Python",
       "Machine Learning",
       "Data Analysis"
    ]
-}
+}}
 """
 
 user_cv = """
@@ -148,7 +148,7 @@ Based on the questionnaire, your main task is to analyze the student's strengths
 to create a profile on the student.
 
 Format the extracted output as structured JSON in the following example format:
-{
+{{
    "strengths": [
       "Strong analytical skills",
       "Excellent communication skills"
@@ -165,7 +165,7 @@ Format the extracted output as structured JSON in the following example format:
       "Struggling with advanced mathematics",
       "Need help with job applications"
    ]
-}
+}}
 """
 
 user_self_description = """

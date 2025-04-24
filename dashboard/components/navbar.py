@@ -30,9 +30,9 @@ def menu_item(text: str, url: str) -> rx.Component:
             rx.match(
                 text,
                 ("Upload Your Data", menu_item_icon("home")),
-                ("Your Roadmap", menu_item_icon("table-2")),
-                ("Your jobs", menu_item_icon("book-open")),
-                ("Mock Interview Preporation", menu_item_icon("user")),
+                ("Your Roadmaps", menu_item_icon("table-2")),
+                ("Your Jobs", menu_item_icon("book-open")),
+                ("Mock Interview Preparation", menu_item_icon("user")),
                 ("Settings", menu_item_icon("settings")),
                 menu_item_icon("layout-dashboard"),
             ),

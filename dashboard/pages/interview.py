@@ -15,17 +15,21 @@ load_dotenv(dotenv_path=env_path)
 AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 # AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 
+
 # ---------------------------------------------------------------------------
 # State: track session object on window only, UI updated via JS
 # ---------------------------------------------------------------------------
 class VoiceState(rx.State):
     """Dummy state to allow script injection on page."""
+
     pass
+
 
 # ---------------------------------------------------------------------------
 # Conversation JS logic using @11labs/client
 # ---------------------------------------------------------------------------
-conv_js = rx.script(f"""
+conv_js = rx.script(
+    f"""
 import {{ Conversation }} from 'https://cdn.jsdelivr.net/npm/@11labs/client/+esm';
 const startButton = document.getElementById('startButton');
 const stopButton  = document.getElementById('stopButton');
@@ -76,19 +80,23 @@ async function stopConversation() {{
 
 startButton.addEventListener('click', startConversation);
 stopButton. addEventListener('click', stopConversation);
-""", strategy="afterInteractive", custom_attrs={"type": "module"})
+""",
+    strategy="afterInteractive",
+    custom_attrs={"type": "module"},
+)
+
 
 # ---------------------------------------------------------------------------
 # Page UI: two buttons and status text
 # ---------------------------------------------------------------------------
-@template(route="/interview", title="Mock Interview Preporation")
+@template(route="/interview", title="Mock Interview Preparation")
 def Interview() -> rx.Component:
     """Page mimicking HTML quickstart: two circular buttons with 'Start'/'Stop'."""
     return rx.vstack(
         rx.heading(
             "Let's get you ready for your interview!",
             size="9",
-            margin_bottom="3rem"
+            margin_bottom="3rem",
         ),
         rx.flex(
             rx.hstack(
@@ -116,14 +124,14 @@ def Interview() -> rx.Component:
                     "Disconnected",
                     id="connectionStatus",
                     as_="span",
-                    font_weight="bold"
+                    font_weight="bold",
                 ),
                 rx.text(" | Agent is ", as_="span", margin_left="1rem"),
                 rx.text(
                     "listening",
                     id="agentStatus",
                     as_="span",
-                    font_weight="bold"
+                    font_weight="bold",
                 ),
                 spacing="2",
             ),
