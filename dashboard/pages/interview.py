@@ -27,11 +27,11 @@ class VoiceState(rx.State):
 # ---------------------------------------------------------------------------
 conv_js = rx.script(f"""
 import {{ Conversation }} from 'https://cdn.jsdelivr.net/npm/@11labs/client/+esm';
-const startButton = document.getElementById('startButton');
-const stopButton  = document.getElementById('stopButton');
+
+const btn         = document.getElementById('voiceBtn');
 const status      = document.getElementById('connectionStatus');
 const agentStatus = document.getElementById('agentStatus');
-let conv;
+let conv = null;
 
 async function getSignedUrl() {{
   const r = await fetch('/api/get-signed-url');
@@ -39,92 +39,65 @@ async function getSignedUrl() {{
   return (await r.json()).signedUrl;
 }}
 
-async function startConversation() {{
-    console.log('▶️ startConversation() called');
+async function toggleConversation() {{
+  if (conv) {{
+    // Останавливаем сессию
+    await conv.endSession();
+    conv = null;
+    btn.textContent      = 'Start';
+    status.textContent   = 'Disconnected';
+    // цвет → зелёный
+    btn.classList.remove('bg-red-500');
+    return;
+  }}
+
+  // Запускаем сессию
   try {{
     await navigator.mediaDevices.getUserMedia({{audio:true}});
-
     const opts = {{
-      onConnect:     () => {{ status.textContent = 'Connected';   }},
-      onDisconnect:  () => {{ status.textContent = 'Disconnected';}},
-      onError:       e  => console.error(e),
-      onModeChange:  m  => {{ agentStatus.textContent = m.mode;   }}
+      onConnect:    () => {{ status.textContent = 'Connected';   }},
+      onDisconnect: () => {{ status.textContent = 'Disconnected';}},
+      onError:      e  => console.error(e),
+      onModeChange: m  => {{ agentStatus.textContent = m.mode;   }}
     }};
-
-    /* PUBLIC agent → прокидываем ID напрямую */
     { '' if os.getenv('USE_SIGNED_URL') else f"opts.agentId = '{AGENT_ID}';" }
-
-    /* PRIVATE agent → получаем временную ссылку */
     { 'opts.signedUrl = await getSignedUrl();' if os.getenv('USE_SIGNED_URL') else '' }
 
     conv = await Conversation.startSession(opts);
-    startButton.disabled = true;
-    stopButton.disabled  = false;
+    btn.textContent = 'STOP';
+    // цвет → красный
+    // btn.classList.replace('bg-green-500', 'bg-red-500');
+    btn.classList.add('bg-red-500');
   }} catch(err) {{
     console.error('Failed to start conversation', err);
   }}
 }}
 
-async function stopConversation() {{
-  if (conv) {{
-    await conv.endSession();
-    conv = null;
-  }}
-  startButton.disabled = false;
-  stopButton.disabled  = true;
-}}
-
-startButton.addEventListener('click', startConversation);
-stopButton. addEventListener('click', stopConversation);
+btn.addEventListener('click', toggleConversation);
 """, strategy="afterInteractive", custom_attrs={"type": "module"})
 
 # ---------------------------------------------------------------------------
 # Page UI: two buttons and status text
 # ---------------------------------------------------------------------------
-@template(route="/interview", title="Mock Interview Preporation")
+@template(route="/interview", title="Mock Interview Preparation")
 def Interview() -> rx.Component:
-    """Page mimicking HTML quickstart: two circular buttons with 'Start'/'Stop'."""
     return rx.vstack(
-        rx.heading(
-            "Let's get you ready for your interview!",
-            size="9",
-            margin_bottom="3rem"
-        ),
+        rx.heading("Let's get you ready for your interview!", size="9", margin_bottom="3rem"),
         rx.flex(
-            rx.hstack(
-                rx.button(
-                    "Start",
-                    id="startButton",
-                    padding="3rem",
-                    margin="5px",
-                    bg="green",
-                    borderRadius="9999px",
-                ),
-                rx.button(
-                    "Stop",
-                    id="stopButton",
-                    padding="3rem",
-                    margin="5px",
-                    borderRadius="9999px",
-                    # disabled=True,
-                ),
-                spacing="4",
+            # Одна кнопка с начальными зелёными стилями
+            rx.button(
+                "Start",
+                id="voiceBtn",
+                padding="3rem",
+                margin="5px",
+                borderRadius="9999px",
+                className=" text-white hover:opacity-90 transition",  # <- здесь
             ),
             rx.hstack(
                 rx.text("Status: ", as_="span"),
-                rx.text(
-                    "Disconnected",
-                    id="connectionStatus",
-                    as_="span",
-                    font_weight="bold"
-                ),
+                rx.text("Disconnected", id="connectionStatus", as_="span", font_weight="bold"),
                 rx.text(" | Agent is ", as_="span", margin_left="1rem"),
-                rx.text(
-                    "listening",
-                    id="agentStatus",
-                    as_="span",
-                    font_weight="bold"
-                ),
+                rx.text("listening", id="agentStatus", as_="span", font_weight="bold"),
                 spacing="2",
             ),
             display="flex",
