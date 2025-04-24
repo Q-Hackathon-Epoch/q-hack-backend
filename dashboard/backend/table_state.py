@@ -29,22 +29,23 @@ class ProcessingState(rx.State):
     modules_path = ''
     grades_path = ''
 
-    # current_modules_response = ''
-    # current_grades_response = ''
-
     @rx.var(cache=True)
     def current_modules_response(self) -> str:
         if self.modules_path == '':
             return ''
         modules_input = convert_to_text(self.modules_path)
-        return agents.get_uni_modules(modules_input)
+        result = agents.get_uni_modules(modules_input)
+        #print(result)
+        return result
 
     @rx.var(cache=True)
     def current_grades_response(self) -> str:
-        if self.grades_path == '' or self.modules_path:
+        if self.grades_path == '' or self.modules_path == '':
             return ''
         grades_input = convert_to_text(self.grades_path)
-        return self.agents.get_student_grades(self.current_modules_response, grades_input)
+        result = agents.get_student_grades(self.current_modules_response, grades_input)
+        print(result)
+        return result
 
 # todo: cv pdf
 
