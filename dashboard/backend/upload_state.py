@@ -2,6 +2,7 @@ from dashboard.backend.utils.convert_to_text import convert_to_text
 
 from langchain_openai.chat_models import AzureChatOpenAI
 from dashboard.backend.agents.Agents import Agents
+# from ..pages.jobs import State as jobState
 
 import reflex as rx
 from dotenv import load_dotenv
@@ -61,6 +62,7 @@ def trigger_pipeline():
         job_offers = file.read()
     job_offers_response = agents.get_personalized_jobs(cv_summary, grades_response, student_skills, job_offers)
     agent_responses['job_offers_response'] = job_offers_response
+    # jobState.matched_ids = job_offers_response
     print(job_offers_response)
 
     roadmap_response = agents.get_upskill_roadmap(modules_response, grades_response, cv_summary, student_skills)

@@ -3,11 +3,13 @@
 import json
 from pathlib import Path
 from ..components.card import card
+import asyncio
 
 import reflex as rx
 
 from ..templates import template
 from ..backend.upload_state import agent_responses
+import random
 
 
 class State(rx.State):
@@ -16,11 +18,25 @@ class State(rx.State):
     # По умолчанию показываем "For you"
     filter_option: str = "all"
     # Пример списка подходящих вакансий по их ID
+    # @rx.var
+    # def matched_ids() -> list[int]:
+    #     return agent_responses['job_offers_response']
     matched_ids: list[int] = agent_responses["job_offers_response"]
 
     def set_filter(self, option: str):
         """Update selected filter option."""
         self.filter_option = option
+
+    @rx.event(background=True)
+    async def poll_matched_ids(self):
+        while True:
+            # берём именно тот ключ, куда trigger_pipeline кладёт результаты
+            new_ids = agent_responses.get("job_offers_response", [])
+            if new_ids != self.matched_ids:
+                async with self:
+                    self.matched_ids = new_ids
+            await asyncio.sleep(1)
+        
 
 
 # Путь к JSON с данными вакансий
@@ -172,8 +188,8 @@ def _job_cards() -> rx.Component:
         width="full",
     )
 
-
-@template(route="/jobs", title="Your Jobs")
+@template(route="/jobs", title="Your Jobs", on_load=[State.poll_matched_ids])
+@rx.page()
 def Jobs() -> rx.Component:
     """The jobs page component with filter controls."""
     return rx.vstack(
