@@ -1,100 +1,139 @@
-"""The profile page."""
-
+from __future__ import annotations
+from dotenv import load_dotenv
+import os
 import reflex as rx
+from pathlib import Path
+from .. import styles
+from ..templates import template  # adjust import as needed
 
-from ..components.profile_input import profile_input
-from ..templates import template
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+env_path = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(dotenv_path=env_path)
 
+AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
+# AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 
-class Profile(rx.Base):
-    name: str = ""
-    email: str = ""
-    notifications: bool = True
+# ---------------------------------------------------------------------------
+# State: track session object on window only, UI updated via JS
+# ---------------------------------------------------------------------------
+class VoiceState(rx.State):
+    """Dummy state to allow script injection on page."""
+    pass
 
+# ---------------------------------------------------------------------------
+# Conversation JS logic using @11labs/client
+# ---------------------------------------------------------------------------
+conv_js = rx.script(f"""
+import {{ Conversation }} from 'https://cdn.jsdelivr.net/npm/@11labs/client/+esm';
+const startButton = document.getElementById('startButton');
+const stopButton  = document.getElementById('stopButton');
+const status      = document.getElementById('connectionStatus');
+const agentStatus = document.getElementById('agentStatus');
+let conv;
 
-class ProfileState(rx.State):
-    profile: Profile = Profile(name="Admin", email="", notifications=True)
+async function getSignedUrl() {{
+  const r = await fetch('/api/get-signed-url');
+  if (!r.ok) throw new Error('Cannot obtain signed URL');
+  return (await r.json()).signedUrl;
+}}
 
-    def handle_submit(self, form_data: dict):
-        self.profile = Profile(**form_data)
-        return rx.toast.success("Profile updated successfully", position="top-center")
+async function startConversation() {{
+    console.log('▶️ startConversation() called');
+  try {{
+    await navigator.mediaDevices.getUserMedia({{audio:true}});
 
-    def toggle_notifications(self):
-        self.profile.notifications = not self.profile.notifications
+    const opts = {{
+      onConnect:     () => {{ status.textContent = 'Connected';   }},
+      onDisconnect:  () => {{ status.textContent = 'Disconnected';}},
+      onError:       e  => console.error(e),
+      onModeChange:  m  => {{ agentStatus.textContent = m.mode;   }}
+    }};
 
+    /* PUBLIC agent → прокидываем ID напрямую */
+    { '' if os.getenv('USE_SIGNED_URL') else f"opts.agentId = '{AGENT_ID}';" }
 
+    /* PRIVATE agent → получаем временную ссылку */
+    { 'opts.signedUrl = await getSignedUrl();' if os.getenv('USE_SIGNED_URL') else '' }
+
+    conv = await Conversation.startSession(opts);
+    startButton.disabled = true;
+    stopButton.disabled  = false;
+  }} catch(err) {{
+    console.error('Failed to start conversation', err);
+  }}
+}}
+
+async function stopConversation() {{
+  if (conv) {{
+    await conv.endSession();
+    conv = null;
+  }}
+  startButton.disabled = false;
+  stopButton.disabled  = true;
+}}
+
+startButton.addEventListener('click', startConversation);
+stopButton. addEventListener('click', stopConversation);
+""", strategy="afterInteractive", custom_attrs={"type": "module"})
+
+# ---------------------------------------------------------------------------
+# Page UI: two buttons and status text
+# ---------------------------------------------------------------------------
 @template(route="/interview", title="Mock Interview Preporation")
 def Interview() -> rx.Component:
-    """The profile page.
-
-    Returns:
-        The UI for the profile page.
-
-    """
+    """Page mimicking HTML quickstart: two circular buttons with 'Start'/'Stop'."""
     return rx.vstack(
-        rx.flex(
-            rx.vstack(
-                rx.hstack(
-                    rx.icon("square-user-round"),
-                    rx.heading("Personal information", size="5"),
-                    align="center",
-                ),
-                rx.text("Update your personal information.", size="3"),
-                width="100%",
-            ),
-            rx.form.root(
-                rx.vstack(
-                    profile_input(
-                        "Name",
-                        "name",
-                        "Admin",
-                        "text",
-                        "user",
-                        ProfileState.profile.name,
-                    ),
-                    profile_input(
-                        "Email",
-                        "email",
-                        "user@reflex.dev",
-                        "email",
-                        "mail",
-                        ProfileState.profile.email,
-                    ),
-                    rx.button("Update", type="submit", width="100%"),
-                    width="100%",
-                    spacing="5",
-                ),
-                on_submit=ProfileState.handle_submit,
-                reset_on_submit=True,
-                width="100%",
-                max_width="325px",
-            ),
-            width="100%",
-            spacing="4",
-            flex_direction=["column", "column", "row"],
+        rx.heading(
+            "Let's get you ready for your interview!",
+            size="9",
+            margin_bottom="3rem"
         ),
-        rx.divider(),
         rx.flex(
-            rx.vstack(
-                rx.hstack(
-                    rx.icon("bell"),
-                    rx.heading("Notifications", size="5"),
-                    align="center",
+            rx.hstack(
+                rx.button(
+                    "Start",
+                    id="startButton",
+                    padding="3rem",
+                    margin="5px",
+                    bg="green",
+                    borderRadius="9999px",
                 ),
-                rx.text("Manage your notification settings.", size="3"),
+                rx.button(
+                    "Stop",
+                    id="stopButton",
+                    padding="3rem",
+                    margin="5px",
+                    borderRadius="9999px",
+                    # disabled=True,
+                ),
+                spacing="4",
             ),
-            rx.checkbox(
-                "Receive product updates",
-                size="3",
-                checked=ProfileState.profile.notifications,
-                on_change=ProfileState.toggle_notifications(),
+            rx.hstack(
+                rx.text("Status: ", as_="span"),
+                rx.text(
+                    "Disconnected",
+                    id="connectionStatus",
+                    as_="span",
+                    font_weight="bold"
+                ),
+                rx.text(" | Agent is ", as_="span", margin_left="1rem"),
+                rx.text(
+                    "listening",
+                    id="agentStatus",
+                    as_="span",
+                    font_weight="bold"
+                ),
+                spacing="2",
             ),
+            display="flex",
+            direction="column",
+            align="center",
+            justify="center",
             width="100%",
-            spacing="4",
-            justify="between",
-            flex_direction=["column", "column", "row"],
+            gap="2rem",
         ),
-        spacing="6",
+        conv_js,
         width="100%",
-        max_width="800px",
     )

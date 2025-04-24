@@ -83,7 +83,7 @@ class State(rx.State):
         with outfile.open("w", encoding="utf-8") as f:
             f.write(content)
         print(f"Form data saved to {filename}")
-        return rx.redirect("/dashboard")
+        return rx.redirect("/jobs")
 
     async def _handle_upload_and_set_name(self, files, kind):
         await self.handle_upload(files)
