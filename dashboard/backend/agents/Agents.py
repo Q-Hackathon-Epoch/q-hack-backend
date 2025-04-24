@@ -119,12 +119,27 @@ class Agents:
         )
         return result
 
-
+    roadmap_schema = {
+    "name": "llm_response",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "answer": {"type": "array",
+                       "description": "The task of the roadmap.",
+                       "items": {
+                           "type": "string",},
+        },
+        "required": [
+            "answer",
+        ],
+        "additionalProperties": False,
+    },
+    "strict": True,}}
     def get_upskill_roadmap(self, uni_module_handbook_json, grade_sheet_json, cv_json, self_description_json):
         prompt_template = get_chat_prompt_template(
             Prompts.system_self_description, Prompts.user_self_description
         )
-        chain = prompt_template | self.llm | StrOutputParser()
+        chain = prompt_template | self.llm.with_structured_output(roadmap_schema)
         result = chain.invoke(
             {
                 "uni_module_handbook_json": uni_module_handbook_json,
