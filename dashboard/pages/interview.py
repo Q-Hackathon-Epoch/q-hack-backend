@@ -15,17 +15,21 @@ load_dotenv(dotenv_path=env_path)
 AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 # AGENT_ID: str = os.getenv("ELEVENLABS_AGENT_ID")
 
+
 # ---------------------------------------------------------------------------
 # State: track session object on window only, UI updated via JS
 # ---------------------------------------------------------------------------
 class VoiceState(rx.State):
     """Dummy state to allow script injection on page."""
+
     pass
+
 
 # ---------------------------------------------------------------------------
 # Conversation JS logic using @11labs/client
 # ---------------------------------------------------------------------------
-conv_js = rx.script(f"""
+conv_js = rx.script(
+    f"""
 import {{ Conversation }} from 'https://cdn.jsdelivr.net/npm/@11labs/client/+esm';
 
 const btn         = document.getElementById('voiceBtn');
@@ -80,6 +84,7 @@ btn.addEventListener('click', toggleConversation);
 # Page UI: two buttons and status text
 # ---------------------------------------------------------------------------
 @template(route="/interview", title="Mock Interview Preparation")
+@template(route="/interview", title="Mock Interview Preparation")
 def Interview() -> rx.Component:
     return rx.vstack(
         rx.heading("Let's get you ready for your interview!", size="9", margin_bottom="3rem"),
@@ -110,3 +115,4 @@ def Interview() -> rx.Component:
         conv_js,
         width="100%",
     )
+

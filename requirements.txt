@@ -7,3 +7,4 @@ langgraph
 azure-ai-projects
 langchain-openai
 openai
+python-dotenv

@@ -86,7 +86,7 @@ class State(rx.State):
         return rx.redirect("/jobs")
 
     async def _handle_upload_and_set_name(self, files, kind):
-        await self.handle_upload(files)
+        await self.handle_upload(files, kind)
         if isinstance(files, list) and files:
             item = files[0]
         else:
@@ -94,29 +94,28 @@ class State(rx.State):
         if hasattr(item, "filename"):
             name = item.filename
         else:
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            name = f"upload_{timestamp}.pdf"
+            name = f"{kind}.pdf"
 
-        if kind == "modules":
+        if kind == "module_handbook":
             self.modules_filename = name
-        elif kind == "transcript":
+        elif kind == "grade_sheet":
             self.transcript_filename = name
-        elif kind == "skills":
+        elif kind == "student_cv":
             self.skills_filename = name
 
         # Update progress when a file is uploaded
         self.progress = self.calculate_progress()
 
     async def handle_upload_modules(self, files):
-        await self._handle_upload_and_set_name(files, "modules")
+        await self._handle_upload_and_set_name(files, "module_handbook")
 
     async def handle_upload_transcript(self, files):
-        await self._handle_upload_and_set_name(files, "transcript")
+        await self._handle_upload_and_set_name(files, "grade_sheet")
 
     async def handle_upload_skills(self, files):
-        await self._handle_upload_and_set_name(files, "skills")
+        await self._handle_upload_and_set_name(files, "student_cv")
 
-    async def handle_upload(self, files):
+    async def handle_upload(self, files, kind):
         try:
             if isinstance(files, list):
                 for file in files:
@@ -125,10 +124,7 @@ class State(rx.State):
                         filename = file.filename
                     else:
                         upload_data = file
-                        timestamp = datetime.datetime.now().strftime(
-                            "%Y%m%d_%H%M%S"
-                        )
-                        filename = f"upload_{timestamp}.pdf"
+                        filename = f"{kind}.pdf"
                     outfile = rx.get_upload_dir() / filename
                     with outfile.open("wb") as file_object:
                         file_object.write(upload_data)
@@ -140,10 +136,7 @@ class State(rx.State):
                     filename = file.filename
                 else:
                     upload_data = file
-                    timestamp = datetime.datetime.now().strftime(
-                        "%Y%m%d_%H%M%S"
-                    )
-                    filename = f"upload_{timestamp}.pdf"
+                    filename = f"{kind}.pdf"
                 outfile = rx.get_upload_dir() / filename
                 with outfile.open("wb") as file_object:
                     file_object.write(upload_data)
@@ -243,6 +236,7 @@ def index() -> rx.Component:
                                     on_drop=State.handle_upload_modules,
                                     max_files=1,
                                     height="100px",
+                                    width="100%",
                                     border="2px dashed",
                                     border_color="gray.200",
                                     border_radius="md",
@@ -292,6 +286,7 @@ def index() -> rx.Component:
                                     on_drop=State.handle_upload_transcript,
                                     max_files=1,
                                     height="100px",
+                                    width="100%",
                                     border="2px dashed",
                                     border_color="gray.200",
                                     border_radius="md",
@@ -341,6 +336,7 @@ def index() -> rx.Component:
                                     on_drop=State.handle_upload_skills,
                                     max_files=1,
                                     height="100px",
+                                    width="100%",
                                     border="2px dashed",
                                     border_color="gray.200",
                                     border_radius="md",
