@@ -87,11 +87,28 @@ class Agents:
     
 
     # output agents
+    jobs_schema = {
+    "name": "llm_response",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "answer": {"type": "array",
+                       "description": "The relevant jobs indecies.",
+                       "items": {
+                           "type": "integer",},
+        },
+        "required": [
+            "answer",
+        ],
+        "additionalProperties": False,
+    },
+    "strict": True,}}
+    
     def get_personalized_jobs(self, cv_json, grade_sheet_json, self_description_json, job_postings_json):
         prompt_template = get_chat_prompt_template(
             Prompts.system_jobs_finder, Prompts.user_jobs_finder
         )
-        chain = prompt_template | self.llm | StrOutputParser()
+        chain = prompt_template | self.llm.with_structured_output(jobs_schema)
         result = chain.invoke(
             {
                 "cv_json": cv_json,
